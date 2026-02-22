@@ -1,6 +1,12 @@
+import "@blocknote/core/fonts/inter.css";
+import "@blocknote/mantine/style.css";
+import "@liveblocks/react-ui/styles.css";
+import "@liveblocks/react-ui/styles/dark/media-query.css";
+import "@liveblocks/react-tiptap/styles.css";
+import "./globals.css";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
