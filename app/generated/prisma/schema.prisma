@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// prisma/schema.prisma (핵심 모델 파트)
+
+enum WorkspaceType {
+  PERSONAL
+  TEAM
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  image String?
+
+  memberships WorkspaceMember[]
+  pages       Page[]            @relation("PageAuthor")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Workspace {
+  id   Int           @id @default(autoincrement())
+  name String
+  type WorkspaceType @default(TEAM)
+
+  members WorkspaceMember[]
+  pages   Page[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkspaceMember {
+  userId      Int
+  workspaceId Int
+  role        WorkspaceRole @default(MEMBER)
+  joinedAt    DateTime      @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // 같은 유저가 같은 워크스페이스에 중복 가입 방지
+  @@id([userId, workspaceId])
+  @@index([workspaceId])
+}
+
+model Page {
+  id Int @id @default(autoincrement())
+
+  workspaceId Int
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // 페이지 트리 (부모-자식)
+  parentId Int?
+  parent   Page?  @relation("PageTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Page[] @relation("PageTree")
+
+  // 작성자 (유저 삭제/탈퇴 대비해서 nullable)
+  authorId Int?
+  author   User? @relation("PageAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+  title   String
+  icon    String?
+  content Json? // 처음엔 String?로 해도 되지만, 블록형이면 Json이 편함
+
+  // 같은 부모 아래 정렬(드래그앤드롭에 필요)
+  order Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@index([parentId])
+  @@index([authorId])
+  @@index([workspaceId, parentId, order])
+}
