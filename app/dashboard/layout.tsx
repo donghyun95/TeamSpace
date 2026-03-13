@@ -1,22 +1,22 @@
-import { AppSidebar } from "@/components/layout/app-sidebar";
-import { NavActions } from "@/components/layout/nav-actions";
+import { AppSidebar } from '@/components/layout/app-sidebar';
+import { NavActions } from '@/components/layout/nav-actions';
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/breadcrumb';
+import { Separator } from '@/components/ui/separator';
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 
 import {
   getSidebarData,
   getChildrenPageByParentsId,
-} from "@/server/users/queries";
+} from '@/server/users/queries';
 
 export default async function RootLayout({
   children,
@@ -52,12 +52,9 @@ export default async function RootLayout({
             <NavActions />
           </div>
         </header>
-
-        <div className="min-h-0 flex flex-1 flex-col gap-4 px-4">
-          {/* <div className="min-h-0 flex-1 overflow-auto py-10">{children}</div> */}
-          <div className="py-10 overflow-visible">{children}</div>
-        </div>
+        {children}
       </SidebarInset>
     </SidebarProvider>
   );
 }
+//className="min-h-0 flex-1 overflow-auto py-10"

@@ -77,6 +77,8 @@ model Page {
   authorId    Int?
   author      User?     @relation("PageAuthor", fields: [authorId], references: [id], onDelete: SetNull)
 
+  roomId      String @unique
+
   title       String
   icon        String?
 
@@ -86,7 +88,9 @@ model Page {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  parts     PagePart[]
+
+
+  snapshots PageSnapshot[]
 
   @@index([workspaceId])
   @@index([parentId])
@@ -94,40 +98,15 @@ model Page {
   @@index([workspaceId, parentId, order])
 }
 
-model PagePart {
-  id         Int      @id @default(autoincrement())
-  pageId     Int
-  partNo     Int
-  roomId     String   @unique
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  page       Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
-
-  snapshots  PagePartSnapshot[]
-
-  @@unique([pageId, partNo])
-  @@index([pageId])
-}
-
-
-
-model PagePartSnapshot {
+model PageSnapshot {
   id          Int      @id @default(autoincrement())
-  pagePartId  Int
+  pageId      Int
   version     Int
   contentJson Json
-  contentHtml String?
-  contentText String?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  roomId     String   
 
+  page        Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
-
-  pagePart    PagePart @relation(fields: [pagePartId], references: [id], onDelete: Cascade)
-
-  @@unique([pagePartId, version])
-  @@index([pagePartId])
+  @@unique([pageId, version])
+  @@index([pageId])
 }

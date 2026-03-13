@@ -1,6 +1,8 @@
-import { Room } from "../../Room";
-import { Editor } from "../../Editor";
-import { getPagePartRooms } from "@/server/users/queries";
+import { Room } from '../../Room';
+import { Editor } from '../../Editor';
+import { getPagePartRooms } from '@/server/users/queries';
+import FloatingCursor from '@/app/FloatingCursor';
+import { EditorWrapper } from '@/app/EditorwWrapper';
 
 type Props = {
   params: {
@@ -16,6 +18,12 @@ export default async function Page({ params }: Props) {
   }
   //값 수정 해야함 , session.uerId
   const PageRoomData = await getPagePartRooms(5, id);
-  console.log("pageRoom Dash", PageRoomData);
-  return <Room data={PageRoomData}></Room>;
+  console.log('pageRoom Dash', PageRoomData);
+  return (
+    <Room data={PageRoomData}>
+      <EditorWrapper>
+        <Editor />
+      </EditorWrapper>
+    </Room>
+  );
 }

@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { ReactNode } from "react";
+import { ReactNode } from 'react';
 import {
   LiveblocksProvider,
   RoomProvider,
   ClientSideSuspense,
-} from "@liveblocks/react/suspense";
-
-import { Editor } from "./Editor";
+  useOthers,
+  useUpdateMyPresence,
+} from '@liveblocks/react/suspense';
 
 type RoomData = {
   id: number;
@@ -20,30 +20,22 @@ type RoomProps = {
   children: ReactNode;
   data: RoomData[];
 };
+function RoomInner({ children }: { children: ReactNode }) {
+  const others = useOthers();
+
+  console.log(others);
+
+  return <>{children}</>;
+}
 
 export function Room({ data, children }: any) {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth" throttle={16}>
-      {data.map((obj: any) => (
-        <div
-          key={obj.id}
-          style={{
-            position: "relative",
-            border: "1px solid #ddd",
-            marginBottom: 16,
-            padding: 12,
-            background: "#fff",
-          }}
-        >
-          <div style={{ marginBottom: 8, fontSize: 14 }}>{obj.roomId}</div>
-
-          <RoomProvider id={obj.roomId}>
-            <ClientSideSuspense fallback={<div>Loading…</div>}>
-              <Editor field={obj.roomId} />
-            </ClientSideSuspense>
-          </RoomProvider>
-        </div>
-      ))}
+      <RoomProvider id={'example'} initialPresence={{ cursor: null }}>
+        <ClientSideSuspense fallback={<div>Loading…</div>}>
+          {children}
+        </ClientSideSuspense>
+      </RoomProvider>
     </LiveblocksProvider>
   );
 }

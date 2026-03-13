@@ -1,6 +1,6 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -48,7 +48,7 @@
 }
 html {
   font-family: Inter, sans-serif;
-  background: #f9f9f9;
+  background: white;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,11 +58,11 @@ html {
 }
 
 .editor {
-  position: absolute;
+  position: relative;
   inset: 0;
   max-width: 1024px;
   margin: 0 auto;
-  padding: 48px 0;
+  /* padding: 48px 0; */
 }
 
 .bn-editor {
@@ -109,7 +109,7 @@ html {
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: 0 0% 100%;
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
@@ -143,7 +143,7 @@ html {
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
+  --background: 0 0% 100%;
   --foreground: oklch(0.984 0.003 247.858);
   --card: oklch(0.208 0.042 265.755);
   --card-foreground: oklch(0.984 0.003 247.858);

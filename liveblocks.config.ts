@@ -3,7 +3,9 @@
 declare global {
   interface Liveblocks {
     // Each user's Presence, for useMyPresence, useOthers, etc.
-    Presence: {};
+    Presence: {
+      cursor: { x: number; y: number } | null;
+    };
 
     // The Storage tree for the room, for useMutation, useStorage, etc.
     Storage: {
