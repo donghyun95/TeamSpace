@@ -11,11 +11,11 @@ import {
   useState,
 } from 'react';
 import FloatingCursor from './FloatingCursor';
+import { PopOverEmoticon } from './PopOverEmoticon';
 
 const CursorLayer = memo(function CursorLayer({ propsRect }) {
   const others = useOthers();
   const cursorElements = useMemo(() => {
-    // console.log(propsRect);
     return others
       .filter((other) => other.presence.cursor != null)
       .map(({ connectionId, presence }) => (
@@ -33,26 +33,19 @@ const CursorLayer = memo(function CursorLayer({ propsRect }) {
 export function EditorWrapper({ children }: { children: ReactNode }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const [rect, setRect] = useState({
-    width: 0,
     height: 0,
-    left: 0,
-    top: 0,
-    scrollLeft: 0,
-    scrollTop: 0,
-    scrollHeight: 0,
-    scrollWidth: 0,
   });
+
   const updateMyPresence = useUpdateMyPresence();
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       const el = e.currentTarget; // 현재 이벤트가 걸린 엘리먼트
       const r = el.getBoundingClientRect();
-      console.log(r.top + window.scrollY);
+      console.log(rect.height);
       updateMyPresence({
         cursor: {
           x: (e.pageX - r.left) / el.scrollWidth,
-          // y: (e.pageY - 56) / r.height,
           y: (e.clientY - r.top) / r.height,
         },
       });
@@ -72,19 +65,11 @@ export function EditorWrapper({ children }: { children: ReactNode }) {
       const r = contentRef.current!.getBoundingClientRect();
 
       setRect({
-        width: r.width,
         height: r.height,
-        left: r.left,
-        top: r.top,
-        scrollHeight: el.scrollHeight,
-        scrollLeft: el.scrollLeft,
-        scrollTop: el.scrollTop,
-        scrollWidth: el.scrollWidth,
       });
     };
 
     updateRect();
-    console.log(el);
     const observer = new ResizeObserver(updateRect);
     observer.observe(contentRef.current);
 
@@ -94,9 +79,11 @@ export function EditorWrapper({ children }: { children: ReactNode }) {
   return (
     <div
       ref={contentRef}
-      className="relative"
+      className="relative page"
       onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
     >
+      <PopOverEmoticon></PopOverEmoticon>
       {children}
       {rect && <CursorLayer propsRect={rect} />}
     </div>

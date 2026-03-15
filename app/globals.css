@@ -1,3 +1,4 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
@@ -48,25 +49,23 @@
 }
 html {
   font-family: Inter, sans-serif;
-  background: white;
 }
-
-@media (prefers-color-scheme: dark) {
+/* background: white; */
+/* @media (prefers-color-scheme: dark) {
   html {
     background: #0c0c0c;
   }
-}
+} */
 
 .editor {
   position: relative;
   inset: 0;
-  max-width: 1024px;
+  width: 800px;
   margin: 0 auto;
-  /* padding: 48px 0; */
 }
 
 .bn-editor {
-  padding: 36px 52px;
+  padding: 10px 52px;
   min-height: 100%;
 }
 
@@ -84,6 +83,36 @@ html {
   right: 12px;
 }
 
+.page {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+.titleWrapper {
+  margin: 0 auto;
+  padding-right: 52px;
+  padding-left: 52px;
+}
+.emotiocnBox {
+  margin: 0 auto;
+  padding-right: 52px;
+  padding-left: 52px;
+  padding-top: 50px;
+}
+.title {
+  width: 692px;
+  margin: 0;
+  border: none;
+  outline: none;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-family: 'Pretendard', sans-serif;
+}
+.emoticonWrapper {
+  display: flex;
+  justify-content: flex-start;
+}
 @media (max-width: 640px) {
   .floating-threads {
     display: block;
@@ -93,19 +122,6 @@ html {
     display: none;
   }
 }
-
-/* .collaboration-carets__label {
-  font-size: 14px !important;
-  font-weight: 900 !important;
-  padding: 10px 16px !important;
-  border-radius: 0 !important;
-  color: black !important;
-
-  background: yellow !important;
-
-  transform: rotate(-3deg);
-  box-shadow: 6px 6px 0 black !important;
-} */
 
 :root {
   --radius: 0.625rem;
@@ -141,9 +157,8 @@ html {
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
 }
-
 .dark {
-  --background: 0 0% 100%;
+  --background: 222.2 84% 4.9%;
   --foreground: oklch(0.984 0.003 247.858);
   --card: oklch(0.208 0.042 265.755);
   --card-foreground: oklch(0.984 0.003 247.858);
@@ -182,5 +197,24 @@ html {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+@layer components {
+  .bn-container h1 {
+    font-size: var(--mantine-h1-font-size) !important;
+    font-weight: var(--mantine-h1-font-weight) !important;
+    line-height: var(--mantine-h1-line-height) !important;
+  }
+
+  .bn-container h2 {
+    font-size: var(--mantine-h2-font-size) !important;
+    font-weight: var(--mantine-h2-font-weight) !important;
+    line-height: var(--mantine-h2-line-height) !important;
+  }
+
+  .bn-container h3 {
+    font-size: var(--mantine-h3-font-size) !important;
+    font-weight: var(--mantine-h3-font-weight) !important;
+    line-height: var(--mantine-h3-line-height) !important;
   }
 }

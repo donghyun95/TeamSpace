@@ -4,6 +4,9 @@ import { getPagePartRooms } from '@/server/users/queries';
 import FloatingCursor from '@/app/FloatingCursor';
 import { EditorWrapper } from '@/app/EditorwWrapper';
 
+import { TitleInput } from '@/app/TitleInput';
+import { EditorProvider } from '@/app/EditorProvider';
+
 type Props = {
   params: {
     pageId: string;
@@ -17,13 +20,17 @@ export default async function Page({ params }: Props) {
     return <div>데이터가없습니다.</div>;
   }
   //값 수정 해야함 , session.uerId
+
   const PageRoomData = await getPagePartRooms(5, id);
   console.log('pageRoom Dash', PageRoomData);
   return (
     <Room data={PageRoomData}>
-      <EditorWrapper>
-        <Editor />
-      </EditorWrapper>
+      <EditorProvider>
+        <EditorWrapper>
+          <TitleInput />
+          <Editor />
+        </EditorWrapper>
+      </EditorProvider>
     </Room>
   );
 }
