@@ -64,7 +64,7 @@ export function SignUpDialog() {
     mutationFn: signupFn,
     onSuccess: async () => {
       // 가입 직후 로그인 상태를 만들었다면 관련 캐시 무효화
-      await queryClient.invalidateQueries({ queryKey: ['me'] });
+      await queryClient.invalidateQueries({ queryKey: ['signUp'] });
       form.reset();
       toast.success('Your registration has been completed.', {
         position: 'top-center',

@@ -16,7 +16,6 @@ import { PopOverEmoticon } from './PopOverEmoticon';
 
 const CursorLayer = memo(function CursorLayer({ propsRect }) {
   const others = useOthers();
-  console.log(others);
   if (others.length === 0) return <></>;
   const cursorElements = useMemo(() => {
     return others

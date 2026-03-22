@@ -26,6 +26,8 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar';
+import { useQuery } from '@tanstack/react-query';
+import { getSidebarData } from '@/lib/api/getSidebarData';
 
 // type SidebarData = {
 //   teams: any[];
@@ -245,11 +247,35 @@ import {
 //     },
 //   ],
 // };
+// {
+//   workspaces: [],
+//   personal: {
+//     workspace: {
+//       id: 2,
+//       name: "slslsl's Personal WorkSpace",
+//       type: 'PERSONAL',
+//       createdAt: 2026-03-21T06:59:22.125Z,
+//       updatedAt: 2026-03-21T06:59:22.125Z
+//     },
+//     rootPages: [ [Object] ]
+//   }
+// }
+import { useParams } from 'next/navigation';
 
 export function AppSidebar({
-  data,
+  initialPage,
   ...props
-}: { data: any } & React.ComponentProps<typeof Sidebar>) {
+}: { initialPage: any } & React.ComponentProps<typeof Sidebar>) {
+  const params = useParams();
+
+  const userId = params.pageId;
+  const { data } = useQuery({
+    queryKey: ['initialPage', userId],
+    queryFn: getSidebarData,
+    initialData: initialPage,
+    staleTime: 1000 * 30,
+  });
+
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
@@ -259,7 +285,7 @@ export function AppSidebar({
       <SidebarContent>
         <NavWorkspaces workspaces={data.workspaces} />
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
-        {/* <NavPersonalSpace pages={data.personal.rootPages} /> */}
+        <NavPersonalSpace pages={data.personal.rootPages} />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

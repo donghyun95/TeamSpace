@@ -2,8 +2,6 @@
 
 import { BlockNoteView } from '@blocknote/mantine';
 import { Threads } from './Threads';
-import { useEffect, useState, useRef } from 'react';
-import { EditorProvider, useEditor } from './EditorProvider';
 import { BlockNoteSchema, defaultBlockSpecs } from '@blocknote/core';
 import { useCreateBlockNoteWithLiveblocks } from '@liveblocks/react-blocknote';
 import { TitleInput } from './TitleInput';
