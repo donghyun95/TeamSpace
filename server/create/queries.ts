@@ -88,3 +88,55 @@ export async function createPage(userID: string, parentID: number | null) {
     return page;
   });
 }
+
+export async function getPageAncestorPath(
+  userId: string,
+  pageId: number,
+): Promise<[]> {
+  const path: [] = [];
+
+  let current = await prisma.page.findFirst({
+    where: {
+      id: pageId,
+      workspace: {
+        members: {
+          some: {
+            userId,
+          },
+        },
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      parentId: true,
+      workspaceId: true,
+      order: true,
+    },
+  });
+
+  if (!current) {
+    throw new Error(`Page not found: ${pageId}`);
+  }
+
+  while (current.parentId !== null) {
+    current = await prisma.page.findUnique({
+      where: { id: current.parentId },
+      select: {
+        id: true,
+        title: true,
+        parentId: true,
+        workspaceId: true,
+        order: true,
+      },
+    });
+
+    if (!current) {
+      throw new Error('Broken page tree: parent page not found');
+    }
+
+    path.push(current.id);
+  }
+
+  return path;
+}

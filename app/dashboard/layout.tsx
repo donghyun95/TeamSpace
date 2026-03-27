@@ -20,8 +20,8 @@ import {
   getChildrenPageByParentsId,
 } from '@/server/users/queries';
 import { NextResponse } from 'next/server';
-import { ClientDataProvider } from './ClientDataProvider';
-
+import { SelectedDataProvider } from '../Providers/ClientDataProvider';
+import { getPageAncestorPath } from '@/server/create/queries';
 export default async function RootLayout({
   children,
 }: {
@@ -32,10 +32,10 @@ export default async function RootLayout({
     redirect('/login');
   }
   const sidebarData = await getSidebarData(session?.user?.id);
-  console.log(sidebarData);
+  // const path = await getPageAncestorPath(session?.user?.id, pageId);
   // const childrenPages = await getChildrenPageByParentsId(5);
   return (
-    <ClientDataProvider>
+    <SelectedDataProvider initialPage={sidebarData}>
       <SidebarProvider>
         <AppSidebar initialPage={sidebarData as any} />
         <SidebarInset>
@@ -63,6 +63,6 @@ export default async function RootLayout({
           {children}
         </SidebarInset>
       </SidebarProvider>
-    </ClientDataProvider>
+    </SelectedDataProvider>
   );
 }

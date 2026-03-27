@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSelfandChildren } from '@/server/users/queries';
 import { auth } from '@/lib/auth';
+import { getPageAncestorPath } from '@/server/create/queries';
 
 type RouteContext = {
   params: {
@@ -15,17 +16,19 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
     if (!session) {
       return NextResponse.json({ error: 'LOGIN_REQUIRED' }, { status: 400 });
     }
+    const { searchParams } = new URL(req.url);
+    const pageIdParam = searchParams.get('pageId');
     const userId = session.user?.id;
-    const { pageId } = await params;
-    const pageid = Number(pageId);
+    console.log(pageIdParam);
+    const pageid = Number(pageIdParam);
 
-    if (!pageId || !Number.isFinite(pageid)) {
+    if (!pageIdParam || !Number.isFinite(pageid)) {
       return new NextResponse(null, { status: 400 });
     }
 
     // 여기부터 정상 로직
     if (userId) {
-      const result = await getSelfandChildren(userId, pageid);
+      const result = await getPageAncestorPath(userId, pageid);
       return NextResponse.json(result);
     }
   } catch (error) {

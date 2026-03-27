@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronRight, MoreHorizontal, Plus } from 'lucide-react';
 
 import {
@@ -16,9 +16,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { createPage } from '@/lib/api/createPage';
+import { getSelfandChildrenFetch } from '@/lib/api/getSelfandChildrenFetch';
+import Link from 'next/link';
 
 type Page = {
   id: string;
@@ -26,39 +28,58 @@ type Page = {
   href?: string;
   hasChildren?: boolean;
 };
-
+type WorkspaceData = {
+  workspaces: any[];
+  personal: {
+    workspace: {
+      id: number;
+      name: string;
+      type: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+    rootPages: any[];
+  };
+};
 type PageTreeNodeProps = {
   page: Page;
   depth: number;
+  ancestorPath: any;
 };
 const INDENT_SIZE = 12;
 const TOGGLE_WIDTH = 20;
 
-function PageTreeNode({ page, depth }: PageTreeNodeProps) {
-  const [children, setChildren] = useState<Page[] | null>(null);
-  const [loading, setLoading] = useState(false);
+function PageTreeNode({
+  page,
+  depth,
+  ancestorPath = new Set(),
+}: PageTreeNodeProps) {
+  const { data: session, status } = useSession();
+  const [open, setOpen] = useState(false);
+  const { data: childrenPages = [] } = useQuery({
+    queryKey: ['page', page.id],
+    queryFn: () => getSelfandChildrenFetch(page.id),
+    staleTime: 0,
+    enabled: true,
+  });
 
   const indent = depth * INDENT_SIZE;
   const childIndent = (depth + 1) * INDENT_SIZE + TOGGLE_WIDTH;
-  const handleOpenChange = async (open: boolean) => {
-    if (!open || loading || children !== null) return;
 
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/pages?parentId=${page.id}`);
-      if (!res.ok) throw new Error('Failed to fetch pages');
-      const result: Page[] = await res.json();
-      setChildren(result);
-    } catch (error) {
-      console.error('Failed to load children:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  function handleOpnOpenChange() {
+    setOpen((prev) => !prev);
+  }
+  useEffect(() => {
+    setOpen(ancestorPath.has(page.id));
+  }, [ancestorPath, page.id]);
+  //onOpenChange={}
   return (
     <SidebarMenuItem className="w-full list-none">
-      <Collapsible className="w-full" onOpenChange={handleOpenChange}>
+      <Collapsible
+        className="w-full"
+        onOpenChange={handleOpnOpenChange}
+        open={open}
+      >
         <div className="group/row grid w-full grid-cols-[1fr_32px] items-center">
           <div
             className="flex min-w-0 items-center"
@@ -76,13 +97,13 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
             </div>
 
             <SidebarMenuButton asChild className="min-w-0 h-8 flex-1 pr-2">
-              <a
-                href={page.href ?? '#'}
+              <Link
+                href={`./${session?.user.id}?PageId=${page.id}`}
                 className="min-w-0 flex-1 truncate"
                 title={page.title}
               >
                 {page.title}
-              </a>
+              </Link>
             </SidebarMenuButton>
           </div>
 
@@ -97,19 +118,15 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
         </div>
 
         <CollapsibleContent className="w-full">
-          {loading && (
-            <div
-              className="px-2 py-1 text-xs text-muted-foreground"
-              style={{ paddingLeft: childIndent }}
-            >
-              Loading...
-            </div>
-          )}
-
-          {children && children.length > 0 && (
+          {childrenPages && childrenPages.length > 0 && (
             <ul className="w-full min-w-0">
-              {children.map((child) => (
-                <PageTreeNode key={child.id} page={child} depth={depth + 1} />
+              {childrenPages.map((child) => (
+                <PageTreeNode
+                  key={child.id}
+                  page={child}
+                  depth={depth + 1}
+                  ancestorPath={ancestorPath}
+                />
               ))}
             </ul>
           )}
@@ -121,15 +138,65 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
 
 type NavPersonalSpaceProps = {
   pages: Page[];
+  path: [];
 };
 
-export function NavPersonalSpace({ pages }: NavPersonalSpaceProps) {
+export function NavPersonalSpace({ pages, path = [] }: NavPersonalSpaceProps) {
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
+  const ancestorPath = new Set(path);
+  console.log('ancestorPath', ancestorPath);
   const mutation = useMutation({
     mutationFn: createPage,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onMutate: async () => {
+      const queryKey = ['initialPage', session?.user.id];
+      await queryClient.cancelQueries({ queryKey });
+      const previousPages = queryClient.getQueryData<WorkspaceData>(queryKey);
+      if (!previousPages) return;
+      const DummyPersonalSpaceRootItem = {
+        authorId: session?.user.id,
+        createdAt: new Date().toString(),
+        icon: null,
+        id: Date.now(),
+        order: previousPages.personal.rootPages.length,
+        parentId: null,
+        title: 'Untitled',
+        updatedAt: new Date().toString(),
+        workspaceId: 1,
+      };
+      queryClient.setQueryData<WorkspaceData>(queryKey, (old) => {
+        if (!old) return old;
+        const value = {
+          ...old,
+          personal: {
+            ...old.personal,
+            rootPages: [
+              ...(old.personal?.rootPages ?? []),
+              DummyPersonalSpaceRootItem,
+            ],
+          },
+        };
+        return value;
+      });
+      return { previousPages };
+    },
+    // onSuccess: () => {
+    //   queryClient.invalidateQueries({
+    //     queryKey: ['initialPage', session?.user.id],
+    //   });
+    // },
+    onError: (_error, _vars, context) => {
+      console.log('❌ 에러 발생 → 롤백');
+      if (!context?.previousPages) return;
+      queryClient.setQueryData(
+        ['initialPage', session?.user.id],
+        context?.previousPages,
+      );
+    },
+    onSettled: async () => {
+      console.log('🔄 invalidate → 서버 동기화');
+
+      await queryClient.invalidateQueries({
         queryKey: ['initialPage', session?.user.id],
       });
     },
@@ -153,7 +220,12 @@ export function NavPersonalSpace({ pages }: NavPersonalSpaceProps) {
       <SidebarGroupContent>
         <SidebarMenu>
           {pages.map((page) => (
-            <PageTreeNode key={page.id} page={page} depth={0} />
+            <PageTreeNode
+              key={page.id}
+              page={page}
+              depth={0}
+              ancestorPath={ancestorPath}
+            />
           ))}
           <SidebarMenuItem>
             <SidebarMenuButton className="text-sidebar-foreground/70">

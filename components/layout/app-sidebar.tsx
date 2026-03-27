@@ -29,7 +29,11 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { getSidebarData } from '@/lib/api/getSidebarData';
 import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 
+import { useEffect } from 'react';
+import { useSelectedData } from '@/app/Providers/ClientDataProvider';
+import { getAncestorPathFetch } from '@/lib/api/getAncestorPathFetch';
 // type SidebarData = {
 //   teams: any[];
 //   navMain: any[];
@@ -261,31 +265,57 @@ import { useSession } from 'next-auth/react';
 //     rootPages: [ [Object] ]
 //   }
 // }
+const isPositiveInt = (n) => Number.isInteger(n) && n > 0;
 
 export function AppSidebar({
   initialPage,
   ...props
 }: { initialPage: any } & React.ComponentProps<typeof Sidebar>) {
   const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
+  const searchParamsPageId = searchParams.get('PageId');
+  const pageNodeID = useSelectedData((state) => state.pageNodeID);
+  const setPageNodeID = useSelectedData((state) => state.setPageNodeID);
+  // console.log(`paramPageId = ${searchParamsPageId}`);
 
+  if (!searchParamsPageId) {
+  }
   const userId = session?.user.id;
-  const { data } = useQuery({
+  const { data: user } = useQuery({
     queryKey: ['initialPage', userId],
     queryFn: getSidebarData,
     initialData: initialPage,
     staleTime: 1000 * 30,
   });
-
+  console.log('search', searchParamsPageId ? searchParamsPageId : pageNodeID);
+  const { data: ancestorPath } = useQuery({
+    queryKey: [
+      'ancestorPath',
+      searchParamsPageId ? searchParamsPageId : pageNodeID,
+    ],
+    queryFn: () =>
+      getAncestorPathFetch(
+        searchParamsPageId ? searchParamsPageId : pageNodeID,
+      ),
+    staleTime: 0,
+  });
+  console.log('조상', ancestorPath);
+  useEffect(() => {
+    if (searchParamsPageId && isPositiveInt(searchParamsPageId)) {
+      setPageNodeID(searchParamsPageId);
+    }
+    // console.log('ancestorPath', ancestorPath);
+  });
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.workspaces} />
+        <TeamSwitcher teams={user.workspaces} />
         {/* <NavMain items={data.navMain} /> */}
       </SidebarHeader>
       <SidebarContent>
-        <NavWorkspaces workspaces={data.workspaces} />
+        <NavWorkspaces workspaces={user.workspaces} />
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
-        <NavPersonalSpace pages={data.personal.rootPages} />
+        <NavPersonalSpace pages={user.personal.rootPages} path={ancestorPath} />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

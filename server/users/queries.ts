@@ -74,7 +74,6 @@ export async function registerUser({
 }
 
 export async function getSidebarData(userId: string) {
-  // 1) 참여 워크스페이스 목록 (개인/팀 모두)
   const memberships = await prisma.workspaceMember.findMany({
     where: { userId },
     include: {
@@ -83,29 +82,36 @@ export async function getSidebarData(userId: string) {
     orderBy: { joinedAt: 'asc' },
   });
 
-  // 2) PERSONAL 워크스페이스 찾기 (보통 1개라고 가정)
-  const personalWorkspace = memberships
-    .map((m) => m.workspace)
-    .find((w) => w.type === 'PERSONAL');
+  const allWorkspaces = memberships.map(({ workspace }) => workspace);
 
-  const teamWorkspace = memberships
-    .map((m) => m.workspace)
-    .filter((w) => w.type === 'TEAM');
-  // 3) 개인 워크스페이스 루트 페이지만 (사이드바용)
-  const personalRootPages = personalWorkspace
-    ? await prisma.page.findMany({
-        where: {
-          workspaceId: personalWorkspace.id,
-          parentId: null,
-        },
-        orderBy: { order: 'asc' },
-      })
-    : [];
+  const personalWorkspace = allWorkspaces.find(
+    (workspace) => workspace.type === 'PERSONAL',
+  );
+
+  const teamWorkspaces = allWorkspaces.filter(
+    (workspace) => workspace.type === 'TEAM',
+  );
+
+  let personal = null;
+
+  if (personalWorkspace) {
+    const rootPages = await prisma.page.findMany({
+      where: {
+        workspaceId: personalWorkspace.id,
+        parentId: null,
+      },
+      orderBy: { order: 'asc' },
+    });
+
+    personal = {
+      workspace: personalWorkspace,
+      rootPages,
+    };
+  }
+
   return {
-    workspaces: teamWorkspace,
-    personal: personalWorkspace
-      ? { workspace: personalWorkspace, rootPages: personalRootPages }
-      : null,
+    workspaces: teamWorkspaces,
+    personal,
   };
 }
 
@@ -145,4 +151,53 @@ export async function getPagePartRooms(userId: string, pageId: number) {
       createdAt: 'asc',
     },
   });
+}
+
+// {
+//   "id": 7,
+//   "workspaceId": 1,
+//   "parentId": 1,
+//   "authorId": "cmmw4fkw90001ksv6adni91id",
+//   "title": "Team Docs",
+//   "icon": "📚",
+//   "order": 1,
+//   "createdAt": "2026-03-18T14:13:05.000Z",
+//   "updatedAt": "2026-03-18T14:13:05.000Z",
+
+//   "children": [
+//     {
+//       "id": 9,
+//       "workspaceId": 1,
+//       "parentId": 7,
+//       "authorId": "cmmw4fkw90001ksv6adni91id",
+//       "title": "Backend Guide"
+//     },
+//     {
+//       "id": 10,
+//       "workspaceId": 1,
+//       "parentId": 7,
+//       "authorId": "cmmw4fkw90001ksv6adni91id",
+//       "title": "Design Guide"
+//     }
+//   ]
+// }
+
+export async function getSelfandChildren(userId: string, pageId: number) {
+  const children = await prisma.page.findMany({
+    where: {
+      parentId: pageId,
+      workspace: {
+        members: {
+          some: {
+            userId,
+          },
+        },
+      },
+    },
+    orderBy: {
+      order: 'asc',
+    },
+  });
+
+  return children;
 }

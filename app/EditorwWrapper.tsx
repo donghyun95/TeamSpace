@@ -1,6 +1,10 @@
 'use client';
 
-import { useUpdateMyPresence, useOthers } from '@liveblocks/react/suspense';
+import {
+  useUpdateMyPresence,
+  useOthers,
+  useOthersMapped,
+} from '@liveblocks/react/suspense';
 import {
   ReactNode,
   useRef,
@@ -14,9 +18,9 @@ import {
 import FloatingCursor from './FloatingCursor';
 import { PopOverEmoticon } from './PopOverEmoticon';
 
-const CursorLayer = memo(function CursorLayer({ propsRect }) {
+const CursorLayer = memo(function CursorLayer({ propsRect, show }) {
+  if (!show) return;
   const others = useOthers();
-  if (others.length === 0) return <></>;
   const cursorElements = useMemo(() => {
     return others
       .filter((other) => other.presence.cursor != null)
@@ -28,7 +32,7 @@ const CursorLayer = memo(function CursorLayer({ propsRect }) {
         />
       ));
   }, [others, propsRect]);
-
+  if (others.length === 0) return <></>;
   return <>{cursorElements}</>;
 });
 
@@ -40,24 +44,29 @@ export function EditorWrapper({ children }: { children: ReactNode }) {
   const [showCursorLayer, setShowCursorLayer] = useState(false);
   const updateMyPresence = useUpdateMyPresence();
 
+  const lastSentRef = useRef(0);
+
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
-      const el = e.currentTarget; // 현재 이벤트가 걸린 엘리먼트
+      const now = performance.now();
+
+      // 200ms = 초당 5번
+      if (now - lastSentRef.current < 200) return;
+
+      lastSentRef.current = now;
+
+      const el = e.currentTarget;
       const r = el.getBoundingClientRect();
-      console.log(rect.height);
+
       updateMyPresence({
         cursor: {
-          x: (e.pageX - r.left) / el.scrollWidth,
+          x: (e.clientX - r.left) / r.width,
           y: (e.clientY - r.top) / r.height,
         },
       });
     },
-    [updateMyPresence, rect],
+    [updateMyPresence],
   );
-
-  const handlePointerLeave = useCallback(() => {
-    updateMyPresence({ cursor: null });
-  }, [updateMyPresence]);
 
   useLayoutEffect(() => {
     // if (!contentRef.current) return;
@@ -91,11 +100,10 @@ export function EditorWrapper({ children }: { children: ReactNode }) {
       ref={contentRef}
       className="relative page"
       onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
     >
-      {showCursorLayer && <PopOverEmoticon />}
+      <PopOverEmoticon />
       {children}
-      {showCursorLayer && <CursorLayer propsRect={rect} />}
+      {/* <CursorLayer propsRect={rect} show={showCursorLayer} /> */}
     </div>
   );
 }

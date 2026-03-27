@@ -8,6 +8,7 @@ import {
   useOthers,
   useUpdateMyPresence,
 } from '@liveblocks/react/suspense';
+import { useSelectedData } from './Providers/ClientDataProvider';
 
 type RoomData = {
   id: number;
@@ -21,18 +22,30 @@ type RoomProps = {
   data: RoomData[];
 };
 
-export function Room({ id, children }: any) {
+export function Room({ PageId, children }: any) {
+  const pageNodeID = useSelectedData((state) => state.pageNodeID);
+  const setPageNodeID = useSelectedData((state) => state.setPageNodeID);
+  useEffect(() => {
+    if (PageId) {
+      setPageNodeID(PageId);
+    }
+  });
+
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth" throttle={16}>
-      <RoomProvider id={'example'} initialPresence={{ cursor: null }}>
-        <ClientSideSuspense fallback={<LoadingFallback />}>
-          {children}
-        </ClientSideSuspense>
+      <RoomProvider
+        id={PageId ? PageId : pageNodeID}
+        initialPresence={{ cursor: null }}
+      >
+        {children}
       </RoomProvider>
     </LiveblocksProvider>
   );
 }
 
+{
+  /* <ClientSideSuspense fallback={<LoadingFallback />}></ClientSideSuspense> */
+}
 export function LoadingFallback() {
   useEffect(() => {
     performance.mark('suspense-fallback-mounted');
