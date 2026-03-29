@@ -27,14 +27,14 @@ export function Room({ PageId, children }: any) {
 
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth" throttle={16}>
-      <ClientSideSuspense fallback={<LoadingFallback />}>
-        <RoomProvider
-          id={PageId ? PageId : pageNodeID}
-          initialPresence={{ cursor: null }}
-        >
+      <RoomProvider
+        id={PageId ? PageId : pageNodeID}
+        initialPresence={{ cursor: null }}
+      >
+        <ClientSideSuspense fallback={<LoadingFallback />}>
           {children}
-        </RoomProvider>
-      </ClientSideSuspense>
+        </ClientSideSuspense>
+      </RoomProvider>
     </LiveblocksProvider>
   );
 }

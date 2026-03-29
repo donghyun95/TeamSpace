@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ChevronRight, MoreHorizontal, Plus } from "lucide-react";
+import { useState } from 'react';
+import { ChevronRight, MoreHorizontal, Plus } from 'lucide-react';
 
 import {
   SidebarGroup,
@@ -10,12 +10,12 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from '@/components/ui/collapsible';
 
 type Page = {
   id: string;
@@ -43,11 +43,11 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
     try {
       setLoading(true);
       const res = await fetch(`/api/pages?parentId=${page.id}`);
-      if (!res.ok) throw new Error("Failed to fetch pages");
+      if (!res.ok) throw new Error('Failed to fetch pages');
       const result: Page[] = await res.json();
       setChildren(result);
     } catch (error) {
-      console.error("Failed to load children:", error);
+      console.error('Failed to load children:', error);
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
 
             <SidebarMenuButton asChild className="min-w-0 h-8 flex-1 pr-2">
               <a
-                href={page.href ?? "#"}
+                href={page.href ?? '#'}
                 className="min-w-0 flex-1 truncate"
                 title={page.title}
               >
@@ -129,11 +129,11 @@ function WorkSpaceUI({ workSpace }: any) {
     try {
       setLoading(true);
       const res = await fetch(`/api/pages?workSpaceId=${workSpace.id}`);
-      if (!res.ok) throw new Error("Failed to fetch pages");
+      if (!res.ok) throw new Error('Failed to fetch pages');
       const result: Page[] = await res.json();
       setChildren(result);
     } catch (error) {
-      console.error("Failed to load children:", error);
+      console.error('Failed to load children:', error);
     } finally {
       setLoading(false);
     }
@@ -156,7 +156,7 @@ function WorkSpaceUI({ workSpace }: any) {
 
             <SidebarMenuButton asChild className="min-w-0 h-8 flex-1 pr-2">
               <a
-                href={"#"}
+                href={'#'}
                 className="min-w-0 flex-1 truncate"
                 title={workSpace.name}
               >
@@ -187,7 +187,6 @@ function WorkSpaceUI({ workSpace }: any) {
 }
 
 export function NavWorkspaces({ workspaces }: any) {
-  console.log("NavWorkspaces", workspaces);
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>WorkSpace</SidebarGroupLabel>

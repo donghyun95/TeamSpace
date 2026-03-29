@@ -121,7 +121,8 @@ export function EditorWrapper({ children }: { children: ReactNode }) {
       <button onClick={handleOnCursorLayer}>활성화</button>
       <PopOverEmoticon />
       {children}
-      {isCursorOn && <CursorLayer propsRect={rect} />}
+      {<CursorLayer propsRect={rect} />}
     </div>
   );
 }
+// isCursorOn &&

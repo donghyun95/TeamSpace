@@ -165,7 +165,6 @@ export function NavPersonalSpace({ pages, path = [] }: NavPersonalSpaceProps) {
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
   const ancestorPath = new Set(path);
-  console.log('ancestorPath', ancestorPath);
   const mutation = useMutation({
     mutationFn: createPage,
     onMutate: async () => {

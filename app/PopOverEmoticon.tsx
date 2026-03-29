@@ -55,7 +55,6 @@ export function PopOverEmoticon() {
   const onEmojiClick = (emojiData, event) => {
     //mutation으로 데이터수정날리기
   };
-  console.log(selfAndChildren.self.icon, '이모티콘');
   return (
     <div className="emotiocnBox">
       <div className="emoticonWrapper title">
