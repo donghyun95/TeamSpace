@@ -105,12 +105,6 @@ export function EditorWrapper({ children }: { children: ReactNode }) {
     }, 3000);
     return () => clearTimeout(timer);
   });
-  const handleOnCursorLayer = (ev) => {
-    console.log(isCursorOn);
-    if (!isCursorOn) {
-      setisCursorOn(true);
-    }
-  };
   return (
     <div
       ref={contentRef}
@@ -118,7 +112,6 @@ export function EditorWrapper({ children }: { children: ReactNode }) {
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
     >
-      <button onClick={handleOnCursorLayer}>활성화</button>
       <PopOverEmoticon />
       {children}
       {isCursorOn && <CursorLayer propsRect={rect} />}

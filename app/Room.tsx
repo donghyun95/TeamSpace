@@ -28,7 +28,7 @@ export function Room({ PageId, children }: any) {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth" throttle={16}>
       <RoomProvider
-        id={PageId ? PageId : pageNodeID}
+        id={PageId ? PageId : String(pageNodeID)}
         initialPresence={{ cursor: null }}
       >
         {children}

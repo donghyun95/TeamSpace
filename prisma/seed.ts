@@ -1,8 +1,7 @@
 import { PrismaClient, WorkspaceType, WorkspaceRole } from '@prisma/client';
 import 'dotenv/config';
-
 import { PrismaPg } from '@prisma/adapter-pg';
-
+import { hashPassword } from '@/lib/password';
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
@@ -20,249 +19,288 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 async function main() {
-  console.log('🌱 seed start');
+  const hashedPassword = await hashPassword('test1234!');
 
   // 유저 생성
-  const owner = await prisma.user.create({
+  const seedUser = await prisma.user.create({
     data: {
-      email: 'owner@example.com',
-      password: 'hashed-password-owner',
-      name: 'Owner Kim',
-      image: 'https://example.com/images/owner.png',
+      email: 'seed-owner@example.com',
+      password: hashedPassword,
+      name: 'Seed Owner User',
+      image: 'https://example.com/seed-owner.png',
     },
   });
 
-  const admin = await prisma.user.create({
+  const otherOwnerUser = await prisma.user.create({
     data: {
-      email: 'admin@example.com',
-      password: 'hashed-password-admin',
-      name: 'Admin Lee',
-      image: 'https://example.com/images/admin.png',
+      email: 'seed-other-owner@example.com',
+      password: hashedPassword,
+      name: 'Seed Other Owner',
+      image: 'https://example.com/seed-other-owner.png',
     },
   });
 
-  const member = await prisma.user.create({
+  const viewerUser = await prisma.user.create({
     data: {
-      email: 'member@example.com',
-      password: 'hashed-password-member',
-      name: 'Member Park',
-      image: 'https://example.com/images/member.png',
-    },
-  });
-
-  const viewer = await prisma.user.create({
-    data: {
-      email: 'viewer@example.com',
-      password: 'hashed-password-viewer',
-      name: 'Viewer Choi',
-      image: 'https://example.com/images/viewer.png',
+      email: 'seed-viewer@example.com',
+      password: hashedPassword,
+      name: 'Seed Viewer User',
+      image: 'https://example.com/seed-viewer.png',
     },
   });
 
   // 워크스페이스 생성
-  const workspace = await prisma.workspace.create({
+  const personalWorkspace = await prisma.workspace.create({
     data: {
-      name: 'Acme Team Workspace',
+      name: 'Seed Personal Workspace',
+      type: WorkspaceType.PERSONAL,
+    },
+  });
+
+  const teamWorkspace = await prisma.workspace.create({
+    data: {
+      name: 'Seed Team Workspace',
       type: WorkspaceType.TEAM,
     },
   });
 
-  // 워크스페이스 멤버 생성
+  const sharedWorkspace = await prisma.workspace.create({
+    data: {
+      name: 'Seed Shared Workspace',
+      type: WorkspaceType.TEAM,
+    },
+  });
+
+  // 멤버십 생성
+  // seedUser는 총 3개 워크스페이스 소속
+  // - personalWorkspace: OWNER
+  // - teamWorkspace: OWNER
+  // - sharedWorkspace: VIEWER
   await prisma.workspaceMember.createMany({
     data: [
       {
-        userId: owner.id,
-        workspaceId: workspace.id,
+        userId: seedUser.id,
+        workspaceId: personalWorkspace.id,
         role: WorkspaceRole.OWNER,
       },
       {
-        userId: admin.id,
-        workspaceId: workspace.id,
-        role: WorkspaceRole.ADMIN,
+        userId: seedUser.id,
+        workspaceId: teamWorkspace.id,
+        role: WorkspaceRole.OWNER,
       },
       {
-        userId: member.id,
-        workspaceId: workspace.id,
-        role: WorkspaceRole.MEMBER,
-      },
-      {
-        userId: viewer.id,
-        workspaceId: workspace.id,
+        userId: seedUser.id,
+        workspaceId: sharedWorkspace.id,
         role: WorkspaceRole.VIEWER,
       },
+
+      {
+        userId: otherOwnerUser.id,
+        workspaceId: sharedWorkspace.id,
+        role: WorkspaceRole.OWNER,
+      },
+      {
+        userId: otherOwnerUser.id,
+        workspaceId: teamWorkspace.id,
+        role: WorkspaceRole.ADMIN,
+      },
+
+      {
+        userId: viewerUser.id,
+        workspaceId: personalWorkspace.id,
+        role: WorkspaceRole.VIEWER,
+      },
+      {
+        userId: viewerUser.id,
+        workspaceId: teamWorkspace.id,
+        role: WorkspaceRole.MEMBER,
+      },
     ],
   });
 
-  // 루트 페이지 생성 (depth 1)
-  const rootPage = await createPageWithSnapshot({
-    workspaceId: workspace.id,
-    authorId: owner.id,
-    parentId: null,
-    title: 'Workspace Home',
-    icon: '🏠',
-    order: 0,
-    depth: 1,
-  });
-
-  // parentId가 실제로 이어지는 depth 6 체인 생성
-  // depth 1: rootPage
-  // depth 2~6까지 생성
-  let currentParentId = rootPage.id;
-
-  for (let depth = 2; depth <= 6; depth++) {
-    const page = await createPageWithSnapshot({
-      workspaceId: workspace.id,
-      authorId: owner.id,
-      parentId: currentParentId,
-      title: `Depth ${depth} Page`,
-      icon: '📄',
-      order: 0,
-      depth,
+  async function createPage(params: {
+    workspaceId: number;
+    authorId?: string | null;
+    title: string;
+    icon?: string | null;
+    parentId?: number | null;
+    order?: number;
+  }) {
+    return prisma.page.create({
+      data: {
+        workspaceId: params.workspaceId,
+        authorId: params.authorId ?? null,
+        title: params.title,
+        icon: params.icon ?? null,
+        parentId: params.parentId ?? null,
+        order: params.order ?? 0,
+      },
     });
-
-    currentParentId = page.id;
   }
 
-  // 루트 아래 형제 페이지들
-  const docsPage = await createPageWithSnapshot({
-    workspaceId: workspace.id,
-    authorId: admin.id,
-    parentId: rootPage.id,
-    title: 'Team Docs',
-    icon: '📚',
-    order: 1,
-    depth: 2,
+  // =========================
+  // 1) PERSONAL WORKSPACE
+  // depth 5 트리 생성
+  // =========================
+  const personalRoot = await createPage({
+    workspaceId: personalWorkspace.id,
+    authorId: seedUser.id,
+    title: 'Personal Home',
+    icon: '🏠',
+    order: 0,
   });
 
-  const roadmapPage = await createPageWithSnapshot({
-    workspaceId: workspace.id,
-    authorId: member.id,
-    parentId: rootPage.id,
-    title: 'Product Roadmap',
+  const personalDepth2 = await createPage({
+    workspaceId: personalWorkspace.id,
+    authorId: seedUser.id,
+    title: 'Projects',
+    icon: '📁',
+    parentId: personalRoot.id,
+    order: 0,
+  });
+
+  const personalDepth3 = await createPage({
+    workspaceId: personalWorkspace.id,
+    authorId: seedUser.id,
+    title: '2026 Roadmap',
     icon: '🗺️',
-    order: 2,
-    depth: 2,
-  });
-
-  // Team Docs 하위 페이지
-  await createPageWithSnapshot({
-    workspaceId: workspace.id,
-    authorId: admin.id,
-    parentId: docsPage.id,
-    title: 'Backend Guide',
-    icon: '🖥️',
+    parentId: personalDepth2.id,
     order: 0,
-    depth: 3,
   });
 
-  await createPageWithSnapshot({
-    workspaceId: workspace.id,
-    authorId: admin.id,
-    parentId: docsPage.id,
-    title: 'Design Guide',
-    icon: '🎨',
-    order: 1,
-    depth: 3,
-  });
-
-  // Product Roadmap 하위 페이지
-  await createPageWithSnapshot({
-    workspaceId: workspace.id,
-    authorId: member.id,
-    parentId: roadmapPage.id,
-    title: 'Q1 Goals',
-    icon: '1️⃣',
-    order: 0,
-    depth: 3,
-  });
-
-  await createPageWithSnapshot({
-    workspaceId: workspace.id,
-    authorId: member.id,
-    parentId: roadmapPage.id,
+  const personalDepth4 = await createPage({
+    workspaceId: personalWorkspace.id,
+    authorId: seedUser.id,
     title: 'Q2 Goals',
-    icon: '2️⃣',
+    icon: '🎯',
+    parentId: personalDepth3.id,
+    order: 0,
+  });
+
+  const personalDepth5 = await createPage({
+    workspaceId: personalWorkspace.id,
+    authorId: seedUser.id,
+    title: 'Launch Checklist',
+    icon: '✅',
+    parentId: personalDepth4.id,
+    order: 0,
+  });
+
+  // 같은 루트 아래 형제 페이지
+  await createPage({
+    workspaceId: personalWorkspace.id,
+    authorId: seedUser.id,
+    title: 'Daily Notes',
+    icon: '📝',
+    parentId: personalRoot.id,
     order: 1,
-    depth: 3,
   });
 
-  console.log('✅ seed complete');
-  console.log(`workspaceId: ${workspace.id}`);
-  console.log(`ownerId: ${owner.id}`);
-}
-
-async function createPageWithSnapshot(params: {
-  workspaceId: number;
-  authorId: string;
-  parentId: number | null;
-  title: string;
-  icon?: string;
-  order: number;
-  depth: number;
-}) {
-  const { workspaceId, authorId, parentId, title, icon, order, depth } = params;
-
-  const page = await prisma.page.create({
-    data: {
-      workspaceId,
-      authorId,
-      parentId,
-      title,
-      icon,
-      order,
-    },
+  await createPage({
+    workspaceId: personalWorkspace.id,
+    authorId: seedUser.id,
+    title: 'Archive',
+    icon: '🗄️',
+    parentId: personalRoot.id,
+    order: 2,
   });
 
-  await prisma.pageSnapshot.create({
-    data: {
-      pageId: page.id,
-      version: 1,
-      contentJson: buildSnapshotContent(title, depth),
-    },
+  // depth 5 아래 추가 자식
+  await createPage({
+    workspaceId: personalWorkspace.id,
+    authorId: seedUser.id,
+    title: 'Appendix',
+    icon: '📎',
+    parentId: personalDepth5.id,
+    order: 0,
   });
 
-  return page;
-}
+  // =========================
+  // 2) TEAM WORKSPACE
+  // =========================
+  const teamRoot = await createPage({
+    workspaceId: teamWorkspace.id,
+    authorId: seedUser.id,
+    title: 'Team Home',
+    icon: '👥',
+    order: 0,
+  });
 
-function buildSnapshotContent(title: string, depth: number) {
-  return {
-    type: 'doc',
-    meta: {
-      title,
-      depth,
-    },
-    content: [
-      {
-        type: 'heading',
-        attrs: {
-          level: Math.min(depth, 6),
-        },
-        content: [
-          {
-            type: 'text',
-            text: title,
-          },
-        ],
-      },
-      {
-        type: 'paragraph',
-        content: [
-          {
-            type: 'text',
-            text: `${title} 페이지의 샘플 본문입니다. 현재 depth는 ${depth}입니다.`,
-          },
-        ],
-      },
-    ],
-  };
+  const teamSpec = await createPage({
+    workspaceId: teamWorkspace.id,
+    authorId: seedUser.id,
+    title: 'Product Spec',
+    icon: '📘',
+    parentId: teamRoot.id,
+    order: 0,
+  });
+
+  const teamMeeting = await createPage({
+    workspaceId: teamWorkspace.id,
+    authorId: otherOwnerUser.id,
+    title: 'Meeting Notes',
+    icon: '📅',
+    parentId: teamRoot.id,
+    order: 1,
+  });
+
+  await createPage({
+    workspaceId: teamWorkspace.id,
+    authorId: seedUser.id,
+    title: 'API',
+    icon: '🔌',
+    parentId: teamSpec.id,
+    order: 0,
+  });
+
+  await createPage({
+    workspaceId: teamWorkspace.id,
+    authorId: otherOwnerUser.id,
+    title: 'Sprint Board',
+    icon: '🏃',
+    parentId: teamMeeting.id,
+    order: 0,
+  });
+
+  // =========================
+  // 3) SHARED WORKSPACE
+  // seedUser는 VIEWER
+  // =========================
+  const sharedRoot = await createPage({
+    workspaceId: sharedWorkspace.id,
+    authorId: otherOwnerUser.id,
+    title: 'Shared Docs',
+    icon: '🤝',
+    order: 0,
+  });
+
+  await createPage({
+    workspaceId: sharedWorkspace.id,
+    authorId: otherOwnerUser.id,
+    title: 'Read Only Guide',
+    icon: '👀',
+    parentId: sharedRoot.id,
+    order: 0,
+  });
+
+  console.log('✅ Seed complete');
+  console.log('--------------------------------');
+  console.log('seed user');
+  console.log('email: seed-owner@example.com');
+  console.log('password: test1234!');
+  console.log('--------------------------------');
+  console.log(`personal workspace id: ${personalWorkspace.id}`);
+  console.log(`team workspace id: ${teamWorkspace.id}`);
+  console.log(`shared workspace id: ${sharedWorkspace.id}`);
+  console.log(`depth 5 page id: ${personalDepth5.id}`);
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (error) => {
-    console.error('❌ seed error:', error);
-    await prisma.$disconnect();
+  .catch((e) => {
+    console.error('❌ Seed failed');
+    console.error(e);
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });

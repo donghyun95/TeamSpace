@@ -31,7 +31,7 @@ import { getSidebarData } from '@/lib/api/getSidebarData';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSelectedData } from '@/app/Providers/ClientDataProvider';
 import { getAncestorPathFetch } from '@/lib/api/getAncestorPathFetch';
 // type SidebarData = {
@@ -274,8 +274,11 @@ export function AppSidebar({
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const searchParamsPageId = searchParams.get('PageId');
-  const pageNodeID = useSelectedData((state) => state.pageNodeID);
   const setPageNodeID = useSelectedData((state) => state.setPageNodeID);
+  const hasAppliedAncestorPathRef = useRef(false);
+  const pageNodeID = useSelectedData((state) => state.pageNodeID);
+  const setNodeopenBatch = useSelectedData((state) => state.setNodesOpenBatch);
+  const setNodeOpen = useSelectedData((state) => state.setNodeOpen);
   // console.log(`paramPageId = ${searchParamsPageId}`);
 
   if (!searchParamsPageId) {
@@ -298,11 +301,30 @@ export function AppSidebar({
       ),
     staleTime: 0,
   });
+
   useEffect(() => {
-    if (searchParamsPageId && isPositiveInt(searchParamsPageId)) {
-      setPageNodeID(searchParamsPageId);
-    }
-  });
+    const searchParamsPageId = searchParams.get('PageId');
+    const num = Number(searchParamsPageId);
+
+    if (!searchParamsPageId || !isPositiveInt(num)) return;
+
+    setPageNodeID((prev) => {
+      if (prev === num) return prev;
+      return num;
+    });
+  }, [searchParams]);
+  const lastAppliedPageIdRef = useRef<number | null>(null);
+  const targetPageId = searchParamsPageId ? Number(searchParamsPageId) : null;
+  useEffect(() => {
+    if (!Array.isArray(ancestorPath)) return;
+    if (!targetPageId) return;
+
+    if (lastAppliedPageIdRef.current === targetPageId) return;
+
+    setNodeopenBatch(ancestorPath, true);
+    lastAppliedPageIdRef.current = targetPageId;
+  }, [targetPageId]);
+
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
@@ -312,7 +334,7 @@ export function AppSidebar({
       <SidebarContent>
         <NavWorkspaces workspaces={user.workspaces} />
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
-        <NavPersonalSpace pages={user.personal.rootPages} path={ancestorPath} />
+        <NavPersonalSpace pages={user.personal.rootPages} />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

@@ -140,3 +140,27 @@ export async function getPageAncestorPath(
 
   return path;
 }
+
+export async function updateTitle(pageId: number, value: string) {
+  try {
+    return await prisma.page.update({
+      where: { id: pageId },
+      data: { title: value },
+    });
+  } catch (e) {
+    console.error(e);
+    throw new Error('페이지 업데이트 실패');
+  }
+}
+
+export async function updateIcon(pageId: number, value: string) {
+  try {
+    return await prisma.page.update({
+      where: { id: pageId },
+      data: { icon: value },
+    });
+  } catch (e) {
+    console.error(e);
+    throw new Error('페이지 업데이트 실패');
+  }
+}

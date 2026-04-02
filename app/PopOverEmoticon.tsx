@@ -9,10 +9,12 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { getSelfandChildrenFetch } from '@/lib/api/getSelfandChildrenFetch';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import EmojiPicker from 'emoji-picker-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelectedData } from './Providers/ClientDataProvider';
+import { updateTitleANDIcon } from '@/lib/api/updateTitleANDIcon';
+
 function SmileIcon() {
   return (
     <svg
@@ -43,19 +45,51 @@ function SmileIcon() {
     </svg>
   );
 }
-
+type UpdateTitleAndIconParams = {
+  pageID: number;
+  title?: string | undefined;
+  icon?: string | undefined;
+};
 export function PopOverEmoticon() {
+  const queryClient = useQueryClient();
   const pageNodeID = useSelectedData((state) => state.pageNodeID);
+
   const { data: selfAndChildren = { self: {}, children: [] } } = useQuery({
-    queryKey: ['page', String(pageNodeID)],
-    queryFn: () => getSelfandChildrenFetch(pageNodeID),
+    queryKey: ['page', Number(pageNodeID)],
+    queryFn: () => getSelfandChildrenFetch(String(pageNodeID)),
     staleTime: 0,
     enabled: true,
   });
+  const [Emoticon, setEmoticon] = useState(undefined);
+  const updateIconMutation = useMutation<
+    unknown,
+    Error,
+    UpdateTitleAndIconParams
+  >({
+    mutationFn: ({ pageID, title, icon }) =>
+      updateTitleANDIcon(pageID, title, icon),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['page', Number(pageNodeID)],
+      });
+    },
+    onError: (error) => {
+      console.error('아이콘 업데이트 에러:', error);
+    },
+  });
   const onEmojiClick = (emojiData, event) => {
     //mutation으로 데이터수정날리기
+    updateIconMutation.mutate({
+      pageID: Number(pageNodeID),
+      title: undefined,
+      icon: emojiData.emoji,
+    });
+    setEmoticon(emojiData.emoji);
   };
-  console.log(selfAndChildren.self.icon, '이모티콘');
+  useEffect(() => {
+    setEmoticon(selfAndChildren.self.icon);
+  }, []);
+
   return (
     <div className="emotiocnBox">
       <div className="emoticonWrapper title">

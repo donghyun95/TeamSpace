@@ -16,7 +16,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueryClient,
+  useQuery,
+  keepPreviousData,
+} from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { createPage } from '@/lib/api/createPage';
 import { getSelfandChildrenFetch } from '@/lib/api/getSelfandChildrenFetch';
@@ -46,54 +51,92 @@ type WorkspaceData = {
 type PageTreeNodeProps = {
   page: Page;
   depth: number;
-  ancestorPath: any;
 };
 const INDENT_SIZE = 12;
 const TOGGLE_WIDTH = 20;
 
-function PageTreeNode({
-  page,
-  depth,
-  ancestorPath = new Set(),
-}: PageTreeNodeProps) {
+function PageTreeNode({ page, depth }: PageTreeNodeProps) {
   //이미 페이지는 page데이터로 렌더 완료 , 자신의 자식페이지들을 렌더링하기위해 자신의 id를 넘기고 자식들 데이터를 배열로가져와서뿌려줌
   const pageNodeID = useSelectedData((state) => state.pageNodeID);
   const isCursorOn = useSelectedData((state) => state.isCursorOn);
+  const isOpen = useSelectedData((state) => state.openMap[page.id] ?? false);
+  const setNodeOpen = useSelectedData((state) => state.setNodeOpen);
   const setisCursorOn = useSelectedData((state) => state.setisCursorOn);
   const { data: session, status } = useSession();
-  const [open, setOpen] = useState(false);
   //자식페이지 배열로 가져옴
-  const { data: selfAndChildren = { self: {}, children: [] } } = useQuery({
+  const { data: selfAndChildren } = useQuery({
     queryKey: ['page', page.id],
     queryFn: () => getSelfandChildrenFetch(page.id),
-    staleTime: 0,
+    staleTime: 1000 * 30,
     enabled: true,
   });
-  console.log(selfAndChildren);
+  const queryClient = useQueryClient();
+  const createChildMutation = useMutation({
+    mutationFn: createPage,
 
+    onMutate: async (parentId: string) => {
+      const queryKey = ['page', parentId];
+
+      await queryClient.cancelQueries({ queryKey });
+
+      const previous = queryClient.getQueryData(queryKey);
+
+      const dummyChild = {
+        id: Date.now(),
+        title: 'Untitled',
+        icon: '📄',
+        parentId,
+        createdAt: new Date().toString(),
+        updatedAt: new Date().toString(),
+      };
+
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          children: [...(old.children ?? []), dummyChild],
+        };
+      });
+
+      return { previous, queryKey };
+    },
+
+    onError: (_err, _vars, ctx) => {
+      if (!ctx) return;
+      queryClient.setQueryData(ctx.queryKey, ctx.previous);
+    },
+
+    onSettled: async (_data, _err, parentId) => {
+      await queryClient.invalidateQueries({
+        queryKey: ['page', parentId],
+      });
+    },
+  });
+  const handleCreateChild = () => {
+    createChildMutation.mutate(page.id);
+  };
   const indent = depth * INDENT_SIZE;
   const childIndent = (depth + 1) * INDENT_SIZE + TOGGLE_WIDTH;
   const handleClickCursorOnOff = (ev) => {
     if (isCursorOn) setisCursorOn(false);
   };
-  function handleOpnOpenChange() {
-    setOpen((prev) => !prev);
+  function handleOpenChange(nextOpen: boolean) {
+    console.log('onOpenChange nextOpen:', nextOpen);
+    setNodeOpen(page.id, nextOpen);
   }
-  useEffect(() => {
-    setOpen(ancestorPath.has(page.id));
-  }, [ancestorPath, page.id]);
 
   //onOpenChange={}
   return (
     <SidebarMenuItem className="w-full list-none">
       <Collapsible
         className="w-full"
-        onOpenChange={handleOpnOpenChange}
-        open={open}
+        onOpenChange={handleOpenChange}
+        open={isOpen}
       >
         <div
           onClick={handleClickCursorOnOff}
-          data-active={String(page.id) === pageNodeID}
+          data-active={Number(page.id) === pageNodeID}
           className={`group/row grid w-full grid-cols-[1fr_32px] rounded-md items-center hover:bg-gray-100 data-[active=true]:hover:bg-gray-200 data-[active=true]:bg-gray-100`}
         >
           <div
@@ -103,7 +146,7 @@ function PageTreeNode({
             <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
               <div className="absolute inset-0 flex items-center justify-center transition-opacity group-hover/row:opacity-0">
                 <span className="text-lg leading-none">
-                  {page.icon === null ? '📄' : page.icon}
+                  {selfAndChildren?.self?.icon || '📄'}
                 </span>
               </div>
 
@@ -119,11 +162,11 @@ function PageTreeNode({
 
             <div className="min-w-0 h-8 flex-1 pr-2 hover:bg-transparent">
               <Link
-                href={`./${session?.user.id}?PageId=${page.id}`}
+                href={`/dashboard/${session?.user.id}?PageId=${page.id}`}
                 className="pl-2 flex h-full min-w-0 flex-1 items-center truncate"
                 title={page.title}
               >
-                {page.title}
+                {selfAndChildren?.self?.title || 'Untitled'}
               </Link>
             </div>
           </div>
@@ -131,6 +174,7 @@ function PageTreeNode({
           <div className="flex h-8 w-8 items-center justify-center">
             <button
               type="button"
+              onClick={handleCreateChild}
               className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity group-hover/row:opacity-100 cursor-pointer"
             >
               <Plus className="h-4 w-4" />
@@ -139,15 +183,10 @@ function PageTreeNode({
         </div>
 
         <CollapsibleContent className="w-full">
-          {selfAndChildren.children.length > 0 && (
+          {selfAndChildren?.children?.length > 0 && (
             <ul className="w-full min-w-0">
               {selfAndChildren.children.map((child) => (
-                <PageTreeNode
-                  key={child.id}
-                  page={child}
-                  depth={depth + 1}
-                  ancestorPath={ancestorPath}
-                />
+                <PageTreeNode key={child.id} page={child} depth={depth + 1} />
               ))}
             </ul>
           )}
@@ -159,14 +198,12 @@ function PageTreeNode({
 
 type NavPersonalSpaceProps = {
   pages: Page[];
-  path: [];
 };
 
-export function NavPersonalSpace({ pages, path = [] }: NavPersonalSpaceProps) {
+export function NavPersonalSpace({ pages }: NavPersonalSpaceProps) {
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
-  const ancestorPath = new Set(path);
-  console.log('ancestorPath', ancestorPath);
+
   const mutation = useMutation({
     mutationFn: createPage,
     onMutate: async () => {
@@ -238,12 +275,7 @@ export function NavPersonalSpace({ pages, path = [] }: NavPersonalSpaceProps) {
       <SidebarGroupContent>
         <SidebarMenu>
           {pages.map((page) => (
-            <PageTreeNode
-              key={page.id}
-              page={page}
-              depth={0}
-              ancestorPath={ancestorPath}
-            />
+            <PageTreeNode key={page.id} page={page} depth={0} />
           ))}
           <SidebarMenuItem>
             <SidebarMenuButton className="text-sidebar-foreground/70">

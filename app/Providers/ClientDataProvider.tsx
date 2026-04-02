@@ -24,8 +24,10 @@ export function SelectedDataProvider({
 
   if (!storeRef.current) {
     storeRef.current = createSelectedDataStore({
-      pageNodeID: String(initialPage.personal.rootPages[0].id),
+      pageNodeID: initialPage.personal.rootPages[0].id,
       isCursorOn: false,
+      ancestorPath: [],
+      openMap: {},
     });
   }
 

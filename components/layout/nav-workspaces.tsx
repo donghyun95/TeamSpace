@@ -1,7 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ChevronRight, MoreHorizontal, Plus } from "lucide-react";
+import { useState } from 'react';
+import { ChevronRight, MoreHorizontal, Plus } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createPage } from '@/lib/api/createPage';
 
 import {
   SidebarGroup,
@@ -10,174 +12,137 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from '@/components/ui/collapsible';
 
 type Page = {
-  id: string;
+  id: string | number;
   title: string;
   href?: string;
   hasChildren?: boolean;
+  icon?: string;
+};
+
+type Workspace = {
+  id: string | number;
+  name: string;
+  rootPages: Page[];
 };
 
 type PageTreeNodeProps = {
   page: Page;
   depth: number;
 };
+
+type NavWorkspacesProps = {
+  workspaces: Workspace[];
+};
+
 const INDENT_SIZE = 12;
 const TOGGLE_WIDTH = 20;
 
-function PageTreeNode({ page, depth }: PageTreeNodeProps) {
-  const [children, setChildren] = useState<Page[] | null>(null);
-  const [loading, setLoading] = useState(false);
+// 기존 PageTreeNode import 해서 써도 되고,
+// 같은 파일이면 기존 PageTreeNode 그대로 재사용하면 된다.
+declare function PageTreeNode(props: PageTreeNodeProps): JSX.Element;
 
-  const indent = depth * INDENT_SIZE;
-  const childIndent = (depth + 1) * INDENT_SIZE + TOGGLE_WIDTH;
-  const handleOpenChange = async (open: boolean) => {
-    if (!open || loading || children !== null) return;
+function WorkspaceItem({ workspace }: { workspace: Workspace }) {
+  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/pages?parentId=${page.id}`);
-      if (!res.ok) throw new Error("Failed to fetch pages");
-      const result: Page[] = await res.json();
-      setChildren(result);
-    } catch (error) {
-      console.error("Failed to load children:", error);
-    } finally {
-      setLoading(false);
-    }
+  const mutation = useMutation({
+    mutationFn: createPage,
+    onMutate: async () => {
+      const queryKey = ['initialPage'];
+      await queryClient.cancelQueries({ queryKey });
+
+      const previous = queryClient.getQueryData<any>(queryKey);
+
+      const dummyRootPage = {
+        id: `temp-${Date.now()}`,
+        title: 'Untitled',
+        icon: '📄',
+        parentId: null,
+        workspaceId: workspace.id,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          workspaces: (old.workspaces ?? []).map((ws: any) =>
+            ws.id === workspace.id
+              ? {
+                  ...ws,
+                  rootPages: [...(ws.rootPages ?? []), dummyRootPage],
+                }
+              : ws,
+          ),
+        };
+      });
+
+      return { previous };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (!ctx?.previous) return;
+      queryClient.setQueryData(['initialPage'], ctx.previous);
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['initialPage'],
+      });
+    },
+  });
+
+  const handleCreateRootPage = () => {
+    mutation.mutate({
+      parentId: null,
+      workspaceId: workspace.id,
+    } as any);
   };
 
   return (
     <SidebarMenuItem className="w-full list-none">
-      <Collapsible className="w-full" onOpenChange={handleOpenChange}>
-        <div className="group/row grid w-full grid-cols-[1fr_32px] items-center">
-          <div
-            className="flex min-w-0 items-center"
-            style={{ paddingLeft: indent }}
-          >
-            <div className="flex h-8 w-5 shrink-0 items-center justify-center">
-              <CollapsibleTrigger asChild>
-                <button
-                  type="button"
-                  className="group/trigger flex h-8 w-5 items-center justify-center rounded-sm hover:bg-sidebar-accent"
-                >
-                  <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/trigger:rotate-90" />
-                </button>
-              </CollapsibleTrigger>
-            </div>
-
-            <SidebarMenuButton asChild className="min-w-0 h-8 flex-1 pr-2">
-              <a
-                href={page.href ?? "#"}
-                className="min-w-0 flex-1 truncate"
-                title={page.title}
-              >
-                {page.title}
-              </a>
-            </SidebarMenuButton>
-          </div>
-
-          <div className="flex h-8 w-8 items-center justify-center">
-            <button
-              type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity group-hover/row:opacity-100 hover:bg-sidebar-accent cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        <CollapsibleContent className="w-full">
-          {loading && (
-            <div
-              className="px-2 py-1 text-xs text-muted-foreground"
-              style={{ paddingLeft: childIndent }}
-            >
-              Loading...
-            </div>
-          )}
-
-          {children && children.length > 0 && (
-            <ul className="w-full min-w-0">
-              {children.map((child) => (
-                <PageTreeNode key={child.id} page={child} depth={depth + 1} />
-              ))}
-            </ul>
-          )}
-        </CollapsibleContent>
-      </Collapsible>
-    </SidebarMenuItem>
-  );
-}
-
-type NavPersonalSpaceProps = {
-  pages: Page[];
-};
-
-function WorkSpaceUI({ workSpace }: any) {
-  const [children, setChildren] = useState<Page[] | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const handleOpenChange = async (open: boolean) => {
-    if (!open || loading || children !== null) return;
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/pages?workSpaceId=${workSpace.id}`);
-      if (!res.ok) throw new Error("Failed to fetch pages");
-      const result: Page[] = await res.json();
-      setChildren(result);
-    } catch (error) {
-      console.error("Failed to load children:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  return (
-    <SidebarMenuItem className="w-full list-none">
-      <Collapsible className="w-full" onOpenChange={handleOpenChange}>
-        <div className="group/row grid w-full grid-cols-[1fr_32px] items-center">
+      <Collapsible className="w-full" open={open} onOpenChange={setOpen}>
+        <div className="group/row grid w-full grid-cols-[1fr_32px] items-center rounded-md hover:bg-gray-100">
           <div className="flex min-w-0 items-center">
             <div className="flex h-8 w-5 shrink-0 items-center justify-center">
               <CollapsibleTrigger asChild>
                 <button
                   type="button"
-                  className="group/trigger flex h-8 w-5 items-center justify-center rounded-sm hover:bg-sidebar-accent"
+                  className="group/trigger flex h-8 w-5 items-center justify-center rounded-sm"
                 >
                   <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/trigger:rotate-90" />
                 </button>
               </CollapsibleTrigger>
             </div>
 
-            <SidebarMenuButton asChild className="min-w-0 h-8 flex-1 pr-2">
-              <a
-                href={"#"}
-                className="min-w-0 flex-1 truncate"
-                title={workSpace.name}
-              >
-                {workSpace.name}
-              </a>
-            </SidebarMenuButton>
+            <div className="flex h-8 min-w-0 flex-1 items-center pr-2">
+              <span className="truncate">{workspace.name}</span>
+            </div>
           </div>
 
           <div className="flex h-8 w-8 items-center justify-center">
             <button
               type="button"
-              className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity group-hover/row:opacity-100 hover:bg-sidebar-accent cursor-pointer"
+              onClick={handleCreateRootPage}
+              className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity group-hover/row:opacity-100 cursor-pointer"
             >
               <Plus className="h-4 w-4" />
             </button>
           </div>
         </div>
+
         <CollapsibleContent className="w-full">
           <SidebarMenu className="w-full">
-            {children?.map((child) => (
-              <PageTreeNode key={child.id} page={child} depth={1} />
+            {workspace.rootPages?.map((page) => (
+              <PageTreeNode key={page.id} page={page} depth={1} />
             ))}
           </SidebarMenu>
         </CollapsibleContent>
@@ -186,22 +151,53 @@ function WorkSpaceUI({ workSpace }: any) {
   );
 }
 
-export function NavWorkspaces({ workspaces }: any) {
-  console.log("NavWorkspaces", workspaces);
+export function NavWorkspaces({ workspaces }: NavWorkspacesProps) {
+  const [open, setOpen] = useState(true);
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>WorkSpace</SidebarGroupLabel>
+      <SidebarGroupLabel>Workspace</SidebarGroupLabel>
 
       <SidebarGroupContent>
         <SidebarMenu>
-          {workspaces.map((p) => (
-            <WorkSpaceUI key={p.name} workSpace={p}></WorkSpaceUI>
-          ))}
-          <SidebarMenuItem>
-            <SidebarMenuButton className="text-sidebar-foreground/70">
-              <MoreHorizontal />
-              <span>More</span>
-            </SidebarMenuButton>
+          <SidebarMenuItem className="w-full list-none">
+            <Collapsible className="w-full" open={open} onOpenChange={setOpen}>
+              <div className="group/row grid w-full grid-cols-[1fr_32px] items-center rounded-md hover:bg-gray-100">
+                <div className="flex min-w-0 items-center">
+                  <div className="flex h-8 w-5 shrink-0 items-center justify-center">
+                    <CollapsibleTrigger asChild>
+                      <button
+                        type="button"
+                        className="group/trigger flex h-8 w-5 items-center justify-center rounded-sm"
+                      >
+                        <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/trigger:rotate-90" />
+                      </button>
+                    </CollapsibleTrigger>
+                  </div>
+
+                  <div className="flex h-8 min-w-0 flex-1 items-center pr-2">
+                    <span className="truncate font-medium">Workspace</span>
+                  </div>
+                </div>
+
+                <div className="flex h-8 w-8 items-center justify-center">
+                  <button
+                    type="button"
+                    className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity group-hover/row:opacity-100"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <CollapsibleContent className="w-full">
+                <SidebarMenu className="w-full">
+                  {workspaces.map((workspace) => (
+                    <WorkspaceItem key={workspace.id} workspace={workspace} />
+                  ))}
+                </SidebarMenu>
+              </CollapsibleContent>
+            </Collapsible>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>

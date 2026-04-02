@@ -1,21 +1,39 @@
 'use client';
 import { getSelfandChildrenFetch } from '@/lib/api/getSelfandChildrenFetch';
-import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useSelectedData } from './Providers/ClientDataProvider';
+import { updateTitleANDIcon } from '@/lib/api/updateTitleANDIcon';
+
+type UpdateTitlePayload = {
+  pageID: number;
+  title: string | undefined;
+  icon: string | undefined;
+};
 
 export function TitleInput({ editor }: any) {
+  const queryClient = useQueryClient();
   const pageNodeID = useSelectedData((state) => state.pageNodeID);
+  const [title, setTitle] = useState('');
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: selfAndChildren = { self: {}, children: [] } } = useQuery({
-    queryKey: ['page', String(pageNodeID)],
-    queryFn: () => getSelfandChildrenFetch(pageNodeID),
+    queryKey: ['page', Number(pageNodeID)],
+    queryFn: () => getSelfandChildrenFetch(String(pageNodeID)),
     staleTime: 0,
     enabled: true,
   });
+  const mutation = useMutation({
+    mutationFn: ({ pageID, title, icon }: UpdateTitlePayload) =>
+      updateTitleANDIcon(pageID, title, icon),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['page', Number(pageNodeID)],
+      });
+    },
+  });
 
-  const [title, setTitle] = useState('');
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+  const handleKeyDown = (ev) => {
+    if (ev.key === 'Enter') {
       console.log('엔터 눌림');
       e.preventDefault();
       e.target.blur();
@@ -33,12 +51,26 @@ export function TitleInput({ editor }: any) {
       editor.focus();
     }
   };
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.currentTarget.value;
     setTitle(value);
-    console.log(value);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    timerRef.current = setTimeout(() => {
+      console.log(selfAndChildren.self.id);
+      mutation.mutate({
+        pageID: selfAndChildren.self.id,
+        title: value,
+        icon: undefined,
+      });
+    }, 1000);
   };
 
+  useEffect(() => {
+    setTitle(selfAndChildren.self.title ?? '');
+  }, [pageNodeID]);
   return (
     <div className="titleWrapper">
       <input
@@ -47,7 +79,7 @@ export function TitleInput({ editor }: any) {
         onChange={handleChange}
         maxLength={30}
         placeholder="Please enter the title"
-        value={selfAndChildren.self.title ?? ''}
+        value={title ?? ''}
       ></input>
     </div>
   );

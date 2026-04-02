@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { auth } from '@/lib/auth';
 import { createPage } from '@/server/create/queries';
-
+//PersonalPageCreate
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();

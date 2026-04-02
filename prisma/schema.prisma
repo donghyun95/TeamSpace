@@ -44,7 +44,7 @@ model User {
 
 model Workspace {
   id        Int               @id @default(autoincrement())
-  name      String            @unique
+  name      String            
   type      WorkspaceType     @default(PERSONAL)
 
   members   WorkspaceMember[]
