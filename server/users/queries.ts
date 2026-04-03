@@ -93,7 +93,6 @@ export async function getSidebarData(userId: string) {
   );
 
   let personal = null;
-
   if (personalWorkspace) {
     const rootPages = await prisma.page.findMany({
       where: {
@@ -104,13 +103,30 @@ export async function getSidebarData(userId: string) {
     });
 
     personal = {
-      workspace: personalWorkspace,
+      ...personalWorkspace,
       rootPages,
     };
   }
 
+  const workspaces = await Promise.all(
+    teamWorkspaces.map(async (workspace) => {
+      const rootPages = await prisma.page.findMany({
+        where: {
+          workspaceId: workspace.id,
+          parentId: null,
+        },
+        orderBy: { order: 'asc' },
+      });
+
+      return {
+        ...workspace,
+        rootPages,
+      };
+    }),
+  );
+
   return {
-    workspaces: teamWorkspaces,
+    workspaces,
     personal,
   };
 }

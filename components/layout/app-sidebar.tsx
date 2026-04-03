@@ -303,6 +303,7 @@ export function AppSidebar({
   });
 
   useEffect(() => {
+    console.log('user', user);
     const searchParamsPageId = searchParams.get('PageId');
     const num = Number(searchParamsPageId);
 
@@ -316,6 +317,7 @@ export function AppSidebar({
   const lastAppliedPageIdRef = useRef<number | null>(null);
   const targetPageId = searchParamsPageId ? Number(searchParamsPageId) : null;
   useEffect(() => {
+    console.log('ancestorPath', ancestorPath);
     if (!Array.isArray(ancestorPath)) return;
     if (!targetPageId) return;
 
@@ -323,7 +325,7 @@ export function AppSidebar({
 
     setNodeopenBatch(ancestorPath, true);
     lastAppliedPageIdRef.current = targetPageId;
-  }, [targetPageId]);
+  }, [targetPageId, ancestorPath]);
 
   return (
     <Sidebar className="border-r-0" {...props}>

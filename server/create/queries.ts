@@ -164,3 +164,74 @@ export async function updateIcon(pageId: number, value: string) {
     throw new Error('페이지 업데이트 실패');
   }
 }
+
+export async function createWorkSpacePage(
+  userID: string,
+  workspaceID: number,
+  parentID: number | null,
+) {
+  return await prisma.$transaction(async (tx) => {
+    const membership = await tx.workspaceMember.findUnique({
+      where: {
+        userId_workspaceId: {
+          userId: userID,
+          workspaceId: workspaceID,
+        },
+      },
+      select: {
+        role: true,
+      },
+    });
+
+    if (!membership) {
+      throw new Error('WORKSPACE_NOT_FOUND_OR_NO_ACCESS');
+    }
+
+    if (membership.role === WorkspaceRole.VIEWER) {
+      throw new Error('FORBIDDEN');
+    }
+
+    if (parentID !== null) {
+      const parentPage = await tx.page.findFirst({
+        where: {
+          id: parentID,
+          workspaceId: workspaceID,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!parentPage) {
+        throw new Error('PARENT_PAGE_NOT_FOUND');
+      }
+    }
+
+    const lastSibling = await tx.page.findFirst({
+      where: {
+        workspaceId: workspaceID,
+        parentId: parentID,
+      },
+      orderBy: {
+        order: 'desc',
+      },
+      select: {
+        order: true,
+      },
+    });
+
+    const nextOrder = (lastSibling?.order ?? -1) + 1;
+
+    const page = await tx.page.create({
+      data: {
+        workspaceId: workspaceID,
+        parentId: parentID,
+        authorId: userID,
+        title: 'Untitled',
+        order: nextOrder,
+      },
+    });
+
+    return page;
+  });
+}

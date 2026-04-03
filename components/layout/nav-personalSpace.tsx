@@ -262,7 +262,7 @@ export function NavPersonalSpace({ pages }: NavPersonalSpaceProps) {
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <div className="group/row grid w-full grid-cols-[1fr_32px] items-center">
-        <span className="pl-2">Personal Space</span>
+        <span className="pl-2 text-sm">Personal Space</span>
         <button
           onClick={handleClickPersonalRootPage}
           type="button"

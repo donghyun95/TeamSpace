@@ -70,7 +70,7 @@ export function TitleInput({ editor }: any) {
 
   useEffect(() => {
     setTitle(selfAndChildren.self.title ?? '');
-  }, [pageNodeID]);
+  }, [pageNodeID, selfAndChildren.self.title]);
   return (
     <div className="titleWrapper">
       <input
