@@ -81,8 +81,9 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
     queryKey: ['page', page.id],
     queryFn: () => getSelfandChildrenFetch(page.id),
     staleTime: 1000 * 30,
-    enabled: true,
+    enabled: isOpen,
   });
+  const icon = selfAndChildren?.self?.icon ?? page.icon ?? '📄';
   const queryClient = useQueryClient();
   const createChildMutation = useMutation({
     mutationFn: createWorkSpacePageFetch,
@@ -137,15 +138,19 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
     },
   });
   const handleCreateChild = () => {
+    if (!page?.workspaceId || !page?.id) return;
     createChildMutation.mutate({
-      workspaceID: selfAndChildren.self.workspaceId,
+      workspaceID: page.workspaceId,
       parentId: page.id,
     });
   };
   const indent = depth * INDENT_SIZE;
   const childIndent = (depth + 1) * INDENT_SIZE + TOGGLE_WIDTH;
   const handleClickCursorOnOff = (ev) => {
-    if (isCursorOn) setisCursorOn(false);
+    if (isCursorOn) {
+      ev.stopPropagation();
+      setisCursorOn(false);
+    }
   };
   function handleOpenChange(nextOpen: boolean) {
     console.log('onOpenChange nextOpen:', nextOpen);
@@ -170,10 +175,8 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
             style={{ paddingLeft: indent }}
           >
             <div className="relative flex h-8 w-8 shrink-0 items-center justify-center">
-              <div className="absolute inset-0 flex items-center justify-center transition-opacity group-hover/row:opacity-0">
-                <span className="text-lg leading-none">
-                  {selfAndChildren?.self?.icon || '📄'}
-                </span>
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity group-hover/row:opacity-0">
+                <span className="text-lg leading-none">{icon}</span>
               </div>
 
               <CollapsibleTrigger asChild>
@@ -192,7 +195,7 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
                 className="pl-2 flex h-full min-w-0 flex-1 items-center truncate"
                 title={page.title}
               >
-                {selfAndChildren?.self?.title || 'Untitled'}
+                {selfAndChildren?.self?.title ?? page.title ?? 'Untitled'}
               </Link>
             </div>
           </div>
@@ -260,7 +263,7 @@ function WorkSpaceFolder({
 }) {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const setNodeOpen = useSelectedData((state) => state.setNodeOpen);
   const createChildMutation = useMutation({
     mutationFn: createWorkSpacePageFetch,
@@ -284,10 +287,10 @@ function WorkSpaceFolder({
   };
   const openChange = (nextBoolean) => {
     console.log('called', nextBoolean);
-    setOpen(nextBoolean);
+    setModalOpen(nextBoolean);
   };
   const handleOpenChange = (ev) => {
-    setOpen(!open);
+    setModalOpen(!modalOpen);
   };
   const handleOpenFolder = (nextOpen: boolean) => {
     setNodeOpen(`workspace-${id}`, nextOpen);
@@ -353,7 +356,7 @@ function WorkSpaceFolder({
         </SidebarMenu>
       </SidebarGroupContent>
       <WorkspaceSettingsDialog
-        open={open}
+        open={modalOpen}
         onOpenChange={openChange}
       ></WorkspaceSettingsDialog>
     </>
