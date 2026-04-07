@@ -86,14 +86,6 @@ export function TitleInput({ editor }: any) {
           value={title ?? ''}
         ></input>
       )}
-      {/* <input
-        className="title"
-        onKeyDown={handleKeyDown}
-        onChange={handleChange}
-        maxLength={30}
-        placeholder="Please enter the title"
-        value={title ?? ''}
-      ></input> */}
     </div>
   );
 }

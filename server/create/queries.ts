@@ -235,3 +235,24 @@ export async function createWorkSpacePage(
     return page;
   });
 }
+
+export async function createWorkSpace(userID: string) {
+  return await prisma.$transaction(async (tx) => {
+    const workspace = await tx.workspace.create({
+      data: {
+        name: 'My Workspace',
+        type: 'TEAM',
+      },
+    });
+
+    await tx.workspaceMember.create({
+      data: {
+        userId: userID,
+        workspaceId: workspace.id,
+        role: 'OWNER',
+      },
+    });
+
+    return workspace;
+  });
+}

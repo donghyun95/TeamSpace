@@ -21,14 +21,9 @@ import { createWorkSpacePageFetch } from '@/lib/api/createWorkSpacePageFetch';
 import { useSelectedData } from '@/app/Providers/ClientDataProvider';
 import Link from 'next/link';
 import { getSelfandChildrenFetch } from '@/lib/api/getSelfandChildrenFetch';
-import {
-  useMutation,
-  useQueryClient,
-  useQuery,
-  keepPreviousData,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { WorkspaceSettingsDialog } from './workspaceModal';
-import { set } from 'zod';
+import { createWorkSpaceFetch } from '@/lib/api/createWorkSpaceFetch';
 
 type Page = {
   id: string | number;
@@ -53,6 +48,7 @@ type Workspace = {
 
 type NavWorkspacesProps = {
   workspaces: Workspace[];
+  userId: string | undefined;
 };
 
 type PageTreeNodeProps = {
@@ -153,7 +149,6 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
     }
   };
   function handleOpenChange(nextOpen: boolean) {
-    console.log('onOpenChange nextOpen:', nextOpen);
     setNodeOpen(page.id, nextOpen);
   }
 
@@ -225,15 +220,21 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
   );
 }
 
-export function NavWorkspaces({ workspaces }: NavWorkspacesProps) {
-  const [open, setOpen] = useState(true);
-
+export function NavWorkspaces({ workspaces, userId }: NavWorkspacesProps) {
+  const queryClient = useQueryClient();
+  const WorkspaceAddMutation = useMutation({
+    mutationFn: createWorkSpaceFetch,
+    onSuccess: () => {
+      // posts 목록 다시 불러오기
+      queryClient.invalidateQueries({ queryKey: ['initialPage', userId] });
+    },
+  });
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <div className="group/row grid w-full grid-cols-[1fr_32px] items-center">
         <span className="pl-2 text-sm">Workspace</span>
         <button
-          onClick={() => setOpen((prev) => !prev)}
+          onClick={() => WorkspaceAddMutation.mutate()}
           type="button"
           className="flex h-8 w-8 items-center justify-center rounded-md cursor-pointer ml-auto"
         >
@@ -286,7 +287,6 @@ function WorkSpaceFolder({
     });
   };
   const openChange = (nextBoolean) => {
-    console.log('called', nextBoolean);
     setModalOpen(nextBoolean);
   };
   const handleOpenChange = (ev) => {

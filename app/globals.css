@@ -109,6 +109,17 @@ html {
   line-height: 1.2;
   font-family: 'Pretendard', sans-serif;
 }
+
+.readonlyTitle {
+  width: 692px;
+  margin: 0 auto;
+  border: none;
+  outline: none;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-family: 'Pretendard', sans-serif;
+}
 .emoticonWrapper {
   display: flex;
   justify-content: flex-start;

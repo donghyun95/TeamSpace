@@ -305,7 +305,6 @@ export function AppSidebar({
   });
 
   useEffect(() => {
-    console.log('user', user);
     const searchParamsPageId = searchParams.get('PageId');
     const num = Number(searchParamsPageId);
 
@@ -319,7 +318,6 @@ export function AppSidebar({
   const lastAppliedPageIdRef = useRef<number | null>(null);
   const targetPageId = searchParamsPageId ? Number(searchParamsPageId) : null;
   useEffect(() => {
-    console.log('ancestorPath', ancestorPath);
     if (!ancestorPath || !Array.isArray(ancestorPath.path)) return;
     if (!targetPageId) return;
 
@@ -336,7 +334,7 @@ export function AppSidebar({
         {/* <NavMain items={data.navMain} /> */}
       </SidebarHeader>
       <SidebarContent>
-        <NavWorkspaces workspaces={user.workspaces} />
+        <NavWorkspaces workspaces={user.workspaces} userId={userId} />
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
         <NavPersonalSpace pages={user.personal.rootPages} />
       </SidebarContent>

@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth';
 import { redirect, notFound } from 'next/navigation';
 import { getPageAncestorPath } from '@/server/create/queries';
 import { ClientOnlyEditor } from '@/app/ClientOnlyEditor';
+
 //initialData 에서 RootPage[] 0번쨰꺼의 데이터를 store에 밀어넣어준다.
 export default async function Page({
   params,
