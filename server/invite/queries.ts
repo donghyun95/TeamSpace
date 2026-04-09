@@ -164,16 +164,32 @@ export async function declineInvite(inviteId: string, userId: string) {
   return { success: true };
 }
 
-export async function searchUsersByEmail(keyword: string) {
-  if (!keyword || keyword.trim().length === 0) {
+export async function searchUsersByEmailPrefix(
+  keyword: string,
+  workspaceId: number,
+) {
+  const q = keyword.trim();
+
+  if (q.length < 2) {
     return [];
   }
-
-  return prisma.user.findMany({
+  console.log(workspaceId);
+  return await prisma.user.findMany({
     where: {
       email: {
-        contains: keyword.trim(),
+        startsWith: q,
         mode: 'insensitive',
+      },
+      memberships: {
+        none: {
+          workspaceId,
+        },
+      },
+      receivedWorkspaceInvites: {
+        none: {
+          workspaceId,
+          status: 'PENDING',
+        },
       },
     },
     select: {
@@ -183,31 +199,7 @@ export async function searchUsersByEmail(keyword: string) {
       image: true,
     },
     orderBy: {
-      createdAt: 'desc',
-    },
-    take: 10,
-  });
-}
-
-export async function searchUsersByEmailPrefix(keyword: string) {
-  const q = keyword.trim();
-
-  if (q.length < 2) {
-    return [];
-  }
-
-  return prisma.user.findMany({
-    where: {
-      email: {
-        startsWith: q,
-        mode: 'insensitive',
-      },
-    },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      image: true,
+      email: 'asc',
     },
     take: 10,
   });

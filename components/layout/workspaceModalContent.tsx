@@ -10,6 +10,7 @@ import {
   User,
   UserCheck,
   UserPlus,
+  User2,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +32,10 @@ import {
   CommandItem,
   CommandEmpty,
 } from '@/components/ui/command';
+import { WorkspaceInviteMembersSection } from './WorkspaceInviteMembersSection';
+import { useQueryClient } from '@tanstack/react-query';
+import { addMemberMutation, useSearchUsers } from './tanstack-query-collection';
+
 type MemberRole = 'Admin' | 'Member' | 'Guest';
 
 type Member = {
@@ -62,12 +67,26 @@ const DEFAULT_MEMBERS: Member[] = [
     role: 'Guest',
   },
 ];
-
-export function WorkspaceSettings() {
-  const [workspaceName, setWorkspaceName] = useState(DEFAULT_WORKSPACE_NAME);
+type User = {
+  id: string | number;
+  name: string;
+  email: string;
+  image?: string;
+};
+export function WorkspaceSettings({
+  workspaceId,
+  workspaceNameProps,
+}: {
+  workspaceId: number;
+  workspaceNameProps: string;
+}) {
+  const [workspaceName, setWorkspaceName] = useState(workspaceNameProps);
   const [inviteKeyword, setInviteKeyword] = useState('');
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [members, setMembers] = useState<Member[]>(DEFAULT_MEMBERS);
-
+  const { mutate: addMemberMutate } = addMemberMutation();
+  const { data: users, isLoading } = useSearchUsers(inviteKeyword, workspaceId);
+  console.log('users', users);
   const filteredMembers = useMemo(() => {
     const keyword = inviteKeyword.trim().toLowerCase();
 
@@ -84,9 +103,21 @@ export function WorkspaceSettings() {
   const handleSaveWorkspaceName = () => {
     console.log('save workspace name:', workspaceName);
   };
+  const handleSearchInput = (value) => {
+    setInviteKeyword(value);
+  };
 
   const handleInvite = () => {
-    console.log('invite member keyword:', inviteKeyword);
+    if (!selectedUser) return;
+    if (typeof selectedUser?.id === 'string') {
+      addMemberMutate({
+        workspaceId,
+        inviteeUserId: selectedUser?.id,
+        role: 'MEMBER',
+      });
+      setSelectedUser(null);
+      setInviteKeyword('');
+    }
   };
 
   const handleUpdateRole = (memberId: number, role: MemberRole) => {
@@ -126,6 +157,10 @@ export function WorkspaceSettings() {
               inviteKeyword={inviteKeyword}
               onChangeInviteKeyword={setInviteKeyword}
               onInvite={handleInvite}
+              userlist={users}
+              onSearch={handleSearchInput}
+              selectedUser={selectedUser}
+              setSelectedUser={setSelectedUser}
             />
 
             <WorkspaceMembersSection
@@ -189,78 +224,6 @@ function WorkspaceIdentitySection({
           <Save className="mr-2 h-4 w-4" />
           Save
         </Button>
-      </div>
-    </section>
-  );
-}
-
-type WorkspaceInviteMembersSectionProps = {
-  inviteKeyword: string;
-  onChangeInviteKeyword: (value: string) => void;
-  onInvite: () => void;
-};
-
-function WorkspaceInviteMembersSection({
-  inviteKeyword,
-  onChangeInviteKeyword,
-  onInvite,
-}: WorkspaceInviteMembersSectionProps) {
-  const results = inviteKeyword
-    ? ['jenny@example.com', 'michael@example.com', 'sophia@example.com']
-    : [];
-
-  return (
-    <section>
-      <div className="mb-4">
-        <Label className="text-sm font-semibold text-slate-900">
-          Invite Members
-        </Label>
-        <p className="mt-1 text-sm text-slate-500">
-          Add new designers or clients to your workspace.
-        </p>
-      </div>
-
-      <div className="relative">
-        <div className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400">
-          <Search className="h-4 w-4" />
-        </div>
-
-        <Input
-          value={inviteKeyword}
-          onChange={(e) => onChangeInviteKeyword(e.target.value)}
-          placeholder="Search by name or email address..."
-          className="h-12 rounded-full border-slate-200 bg-slate-100/50 pl-11 pr-28 focus-visible:ring-slate-400"
-        />
-
-        <Button
-          onClick={onInvite}
-          className="absolute right-1 top-1/2 -translate-y-1/2 h-10 rounded-full bg-slate-800 px-6 text-white hover:bg-slate-900 active:scale-95"
-        >
-          <UserPlus className="mr-2 h-4 w-4" />
-          Invite
-        </Button>
-
-        {inviteKeyword.trim().length > 0 && (
-          <div className="absolute top-full z-20 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
-            <Command>
-              <CommandList>
-                {results.length === 0 ? (
-                  <CommandEmpty>No users found.</CommandEmpty>
-                ) : (
-                  results.map((user) => (
-                    <CommandItem
-                      key={user}
-                      onSelect={() => onChangeInviteKeyword(user)}
-                      className="cursor-pointer"
-                    >
-                      {user}
-                    </CommandItem>
-                  ))
-                )}
-              </CommandList>
-            </Command>
-          </div>
-        )}
       </div>
     </section>
   );

@@ -248,3 +248,109 @@ export async function getSelfandChildren(userId: string, pageId: number) {
   const role = membership?.role;
   return { self, children, role };
 }
+
+type PageInfo = {
+  id: number;
+  workspaceId: number;
+  authorId: string | null;
+  ispublished: boolean;
+  publictoken: string | null;
+};
+
+type PageAccessResult = {
+  exists: boolean;
+  hasAccess: boolean;
+  role: WorkspaceRole | null;
+  page: PageInfo | null;
+};
+
+export async function getUserPageAccess(
+  userId: string | null | undefined,
+  pageId: number,
+): Promise<PageAccessResult> {
+  const page = await prisma.page.findUnique({
+    where: { id: pageId },
+    select: {
+      id: true,
+      workspaceId: true,
+      authorId: true,
+      ispublished: true,
+      publictoken: true,
+    },
+  });
+
+  if (!page) {
+    return {
+      exists: false,
+      hasAccess: false,
+      role: null,
+      page: null,
+    };
+  }
+
+  const pageInfo: PageInfo = {
+    id: page.id,
+    workspaceId: page.workspaceId,
+    authorId: page.authorId,
+    ispublished: page.ispublished,
+    publictoken: page.publictoken,
+  };
+  console.log('유저아이디', userId);
+  if (!userId) {
+    return {
+      exists: true,
+      hasAccess: false,
+      role: null,
+      page: pageInfo,
+    };
+  }
+  console.log(userId, page.workspaceId);
+  const membership = await prisma.workspaceMember.findUnique({
+    where: {
+      userId_workspaceId: {
+        userId,
+        workspaceId: page.workspaceId,
+      },
+    },
+    select: {
+      role: true,
+    },
+  });
+
+  if (!membership) {
+    console.log('노멤버십', membership);
+    return {
+      exists: true,
+      hasAccess: false,
+      role: null,
+      page: pageInfo,
+    };
+  }
+
+  return {
+    exists: true,
+    hasAccess: true,
+    role: membership.role,
+    page: pageInfo,
+  };
+}
+
+export async function assertPagePublished(pageId: number) {
+  const page = await prisma.page.findUnique({
+    where: { id: pageId },
+    select: {
+      id: true,
+      ispublished: true,
+    },
+  });
+
+  if (!page) {
+    throw new Error('Page not found');
+  }
+
+  if (!page.ispublished) {
+    throw new Error('Page is not published');
+  }
+
+  return page;
+}

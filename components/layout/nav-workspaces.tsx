@@ -383,6 +383,8 @@ function WorkSpaceFolder({
       <WorkspaceSettingsDialog
         open={modalOpen}
         onOpenChange={openChange}
+        workspaceId={id}
+        workspaceName={workSpaceName}
       ></WorkspaceSettingsDialog>
     </>
   );

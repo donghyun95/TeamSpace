@@ -5,11 +5,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const keyword = searchParams.get('keyword') ?? '';
-
-    const users = await searchUsersByEmailPrefix(keyword);
-
+    const keyword = req.nextUrl.searchParams.get('keyword') ?? '';
+    const workspaceId = req.nextUrl.searchParams.get('workspaceId') ?? null;
+    console.log(workspaceId, '워크스펭;스');
+    if (!workspaceId || !keyword) {
+      return NextResponse.json(
+        { message: '검색 중 오류가 발생했습니다.' },
+        { status: 500 },
+      );
+    }
+    const users = await searchUsersByEmailPrefix(keyword, Number(workspaceId));
+    console.log(users);
     return NextResponse.json(users);
   } catch (error) {
     console.error('USER SEARCH ERROR:', error);

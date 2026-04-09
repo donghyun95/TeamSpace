@@ -1,7 +1,7 @@
 'use client';
 import { getSelfandChildrenFetch } from '@/lib/api/getSelfandChildrenFetch';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSelectedData } from './Providers/ClientDataProvider';
 import { updateTitleANDIcon } from '@/lib/api/updateTitleANDIcon';
 
@@ -33,8 +33,8 @@ export function TitleInput({ editor }: any) {
     },
   });
 
-  const handleKeyDown = (ev) => {
-    if (ev.key === 'Enter') {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
       console.log('엔터 눌림');
       e.preventDefault();
       e.target.blur();

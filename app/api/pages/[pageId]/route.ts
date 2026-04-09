@@ -26,12 +26,9 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
     // 여기부터 정상 로직
     if (userId) {
       const result = await getSelfandChildren(userId, pageid);
-      console.log(result);
       return NextResponse.json(result);
     }
   } catch (error) {
-    console.error(error);
-
     return NextResponse.json(
       { error: 'INTERNAL_SERVER_ERROR' },
       { status: 500 },
