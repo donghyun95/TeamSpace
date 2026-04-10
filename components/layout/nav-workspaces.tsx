@@ -30,6 +30,7 @@ import { getSelfandChildrenFetch } from '@/lib/api/getSelfandChildrenFetch';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { WorkspaceSettingsDialog } from './workspaceModal';
 import { createWorkSpaceFetch } from '@/lib/api/createWorkSpaceFetch';
+import { useWorkspaceMemberRole } from './tanstack-query-collection';
 
 type Page = {
   id: string | number;
@@ -291,13 +292,16 @@ function WorkSpaceFolder({
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const setNodeOpen = useSelectedData((state) => state.setNodeOpen);
+  const userId = session?.user?.id ?? '';
+  const { data: role, isLoading, error } = useWorkspaceMemberRole(id, userId);
+
   const createChildMutation = useMutation({
     mutationFn: createWorkSpacePageFetch,
 
     onSettled: async (_data, _err, variables) => {
       if (variables.parentId === null) {
         await queryClient.invalidateQueries({
-          queryKey: ['initialPage', session?.user.id],
+          queryKey: ['initialPage', userId],
         });
       }
     },
@@ -330,42 +334,45 @@ function WorkSpaceFolder({
               open={isOpen}
               onOpenChange={handleOpenFolder}
             >
-              <div className="group/row grid w-full grid-cols-[1fr_32px_32px] items-center rounded-md hover:bg-gray-100">
-                <div className="flex min-w-0 items-center">
-                  <div className="flex min-w-0 items-center">
-                    <CollapsibleTrigger asChild>
-                      <button className="group/trigger flex w-full items-center">
-                        <div className="flex h-8 w-5 shrink-0 items-center justify-center">
-                          <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/trigger:rotate-90" />
-                        </div>
+              <div className="group/row flex w-full items-center rounded-md hover:bg-gray-100">
+                <div className="flex min-w-0 flex-1 items-center">
+                  <CollapsibleTrigger asChild>
+                    <button className="group/trigger flex w-full items-center">
+                      <div className="flex h-8 w-5 shrink-0 items-center justify-center">
+                        <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/trigger:rotate-90" />
+                      </div>
 
-                        <div className="px-2 flex-1 min-w-0 cursor-pointer">
-                          <span className="block truncate text-sm font-medium leading-none">
-                            {workSpaceName || 'My Workspace'}
-                          </span>
-                        </div>
+                      <div className="min-w-0 flex-1 px-2 text-left">
+                        <span className="block truncate text-sm font-medium leading-none">
+                          {workSpaceName || 'My Workspace'}
+                        </span>
+                      </div>
+                    </button>
+                  </CollapsibleTrigger>
+                </div>
+
+                <div className="flex w-16 shrink-0 items-center justify-end">
+                  {role === 'OWNER' && (
+                    <div className="flex h-8 w-8 items-center justify-center">
+                      <button
+                        onClick={handleOpenChange}
+                        type="button"
+                        className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity cursor-pointer group-hover/row:opacity-100 hover:bg-sidebar-accent"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
                       </button>
-                    </CollapsibleTrigger>
-                  </div>
-                </div>
-                <div className="flex h-8 w-8 items-center justify-center">
-                  <button
-                    onClick={handleOpenChange}
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity group-hover/row:opacity-100 hover:bg-sidebar-accent cursor-pointer"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </button>
-                </div>
+                    </div>
+                  )}
 
-                <div className="flex h-8 w-8 items-center justify-center">
-                  <button
-                    onClick={handleCreateRootPage}
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity group-hover/row:opacity-100 hover:bg-sidebar-accent cursor-pointer"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
+                  <div className="flex h-8 w-8 items-center justify-center">
+                    <button
+                      onClick={handleCreateRootPage}
+                      type="button"
+                      className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity cursor-pointer group-hover/row:opacity-100 hover:bg-sidebar-accent"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
 

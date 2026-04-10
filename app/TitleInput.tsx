@@ -15,7 +15,6 @@ export function TitleInput({ editor }: any) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState('');
   const pageNodeID = useSelectedData((state) => state.pageNodeID);
-
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: selfAndChildren = { self: {}, children: [] } } = useQuery({
     queryKey: ['page', Number(pageNodeID)],
@@ -35,7 +34,6 @@ export function TitleInput({ editor }: any) {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      console.log('엔터 눌림');
       e.preventDefault();
       e.target.blur();
       const newBlocks = editor.insertBlocks(
@@ -60,7 +58,6 @@ export function TitleInput({ editor }: any) {
     }
 
     timerRef.current = setTimeout(() => {
-      console.log(selfAndChildren.self.id);
       mutation.mutate({
         pageID: selfAndChildren.self.id,
         title: value,

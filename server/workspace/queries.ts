@@ -1,0 +1,23 @@
+import { prisma } from '@/lib/prisma';
+
+export async function getUserWorkspaceRole(
+  userId: string,
+  workspaceId: number,
+) {
+  const membership = await prisma.workspaceMember.findUnique({
+    where: {
+      userId_workspaceId: {
+        userId,
+        workspaceId,
+      },
+    },
+    select: {
+      role: true,
+    },
+  });
+  if (!membership) {
+    throw new Error('Not a workspace member');
+  }
+
+  return membership.role;
+}
