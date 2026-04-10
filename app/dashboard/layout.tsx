@@ -24,6 +24,7 @@ import { SelectedDataProvider } from '../Providers/ClientDataProvider';
 import { getPageAncestorPath } from '@/server/create/queries';
 import { Input } from '@/components/ui/input';
 import { Check, Search } from 'lucide-react';
+
 export default async function RootLayout({
   children,
 }: {

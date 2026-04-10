@@ -1,88 +1,64 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-
-type Pos = {
+type FloatingCursorProps = {
   x: number;
   y: number;
+  label?: string;
 };
 
-export default function FloatingCursor({ x, y }: any) {
+export default function FloatingCursor({
+  x,
+  y,
+  label = '다른 사용자',
+}: FloatingCursorProps) {
   return (
     <div
       style={{
-        position: 'absolute',
-        left: 0,
+        position: 'fixed',
+        left: x,
         top: y,
-        width: '100%',
         pointerEvents: 'none',
         zIndex: 9999,
-        transform: 'translateY(-50%)',
+        transform: 'translate(-2px, -2px)',
       }}
     >
       <div
         style={{
-          width: '100%',
-          height: '24px',
-          background: 'rgba(59, 130, 246, 0.15)',
-          borderTop: '1px solid rgba(59, 130, 246, 0.8)',
-          borderBottom: '1px solid rgba(59, 130, 246, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          paddingLeft: '8px',
-          boxSizing: 'border-box',
+          position: 'relative',
+          width: 20,
+          height: 20,
         }}
       >
         <div
           style={{
-            width: '8px',
-            height: '8px',
-            borderRadius: '9999px',
-            background: 'rgba(59, 130, 246, 1)',
-            marginRight: '8px',
+            width: 0,
+            height: 0,
+            borderLeft: '3px solid transparent',
+            borderRight: '7px solid transparent',
+            borderTop: '14px solid #3b82f6',
+            transform: 'rotate(-45deg)',
+            transformOrigin: 'top left',
+            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))',
           }}
         />
-        <span
-          style={{
-            fontSize: '12px',
-            color: '#1d4ed8',
-            fontWeight: 600,
-          }}
-        >
-          다른 사용자의 위치
-        </span>
+      </div>
+
+      <div
+        style={{
+          marginTop: 2,
+          marginLeft: 12,
+          display: 'inline-block',
+          padding: '4px 8px',
+          borderRadius: 9999,
+          background: '#3b82f6',
+          color: '#fff',
+          fontSize: 12,
+          fontWeight: 600,
+          lineHeight: 1.2,
+          whiteSpace: 'nowrap',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        }}
+      >
+        {label}
       </div>
     </div>
   );
 }
-
-// export default function FloatingCursor({ x, y }: Pos) {
-//   return (
-//     <div
-//       style={{
-//         position: 'absolute',
-//         // left: `${x * 100}%`,
-//         top: y,
-//         pointerEvents: 'none',
-//         zIndex: 9999,
-//         transform: `translate(2px, 2px)`,
-//       }}
-//     >
-//       <svg
-//         width="100%"
-//         height="24"
-//         viewBox="0 0 24 24"
-//         fill="none"
-//         xmlns="http://www.w3.org/2000/svg"
-//       >
-//         <path
-//           d="M5 3L18 14H11L8 21L5 3Z"
-//           fill="black"
-//           stroke="white"
-//           strokeWidth="1.5"
-//           strokeLinejoin="round"
-//         />
-//       </svg>
-//     </div>
-//   );
-// }

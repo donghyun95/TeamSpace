@@ -1,5 +1,5 @@
 'use client';
-import { BlockNoteView } from '@blocknote/mantine';
+import { BlockNoteView } from '@/node_modules/@blocknote/react/mantine/types/src';
 import {
   useCreateBlockNoteWithLiveblocks,
   useIsEditorReady,
