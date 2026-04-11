@@ -48,26 +48,6 @@ import { togglePublishFetch } from '@/lib/api/togglePublishFetch';
 import { is } from 'zod/v4/locales';
 import { Input } from '@/components/ui/input';
 import { PublishButton } from './publishbutton';
-const data = [
-  [
-    {
-      label: 'Move to Trash',
-      icon: Trash2,
-    },
-  ],
-  [
-    {
-      label: 'Version History',
-      icon: GalleryVerticalEnd,
-    },
-  ],
-  [
-    {
-      label: 'Export PDF',
-      icon: FileText,
-    },
-  ],
-];
 
 export function NavActions() {
   const [isOpen, setIsOpen] = React.useState(false);
