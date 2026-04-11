@@ -12,7 +12,6 @@ import {
   UserPlus,
   User2,
 } from 'lucide-react';
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -34,8 +33,12 @@ import {
 } from '@/components/ui/command';
 import { WorkspaceInviteMembersSection } from './WorkspaceInviteMembersSection';
 import { useQueryClient } from '@tanstack/react-query';
-import { addMemberMutation, useSearchUsers } from './tanstack-query-collection';
-
+import {
+  addMemberMutation,
+  useSearchUsers,
+  useRenameWorkspaceMutation,
+} from './tanstack-query-collection';
+import { useSession } from 'next-auth/react';
 type MemberRole = 'Admin' | 'Member' | 'Guest';
 
 type Member = {
@@ -86,7 +89,9 @@ export function WorkspaceSettings({
   const [members, setMembers] = useState<Member[]>(DEFAULT_MEMBERS);
   const { mutate: addMemberMutate } = addMemberMutation();
   const { data: users, isLoading } = useSearchUsers(inviteKeyword, workspaceId);
-  console.log('users', users);
+  const { mutate: mutateWorkspaceName } = useRenameWorkspaceMutation();
+  const { data: session } = useSession();
+  const sessionUserId = session?.user.id || '';
   const filteredMembers = useMemo(() => {
     const keyword = inviteKeyword.trim().toLowerCase();
 
@@ -101,6 +106,11 @@ export function WorkspaceSettings({
   }, [inviteKeyword, members]);
 
   const handleSaveWorkspaceName = () => {
+    mutateWorkspaceName({
+      workspaceId,
+      name: workspaceName,
+      userId: sessionUserId,
+    });
     console.log('save workspace name:', workspaceName);
   };
   const handleSearchInput = (value) => {

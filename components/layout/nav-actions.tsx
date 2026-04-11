@@ -35,18 +35,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { Switch } from '@/components/ui/switch';
-import { useState } from 'react';
-import { useEditComment } from '@liveblocks/react';
-import { Globe, Link2 } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { Label } from '../ui/label';
-import { pagePublicInfoFetch } from '@/lib/api/getPublishedFetch';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSelectedData } from '@/app/Providers/ClientDataProvider';
-import { togglePublishFetch } from '@/lib/api/togglePublishFetch';
-import { is } from 'zod/v4/locales';
-import { Input } from '@/components/ui/input';
 import { PublishButton } from './publishbutton';
 
 export function NavActions() {

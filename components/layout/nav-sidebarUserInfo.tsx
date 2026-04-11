@@ -1,8 +1,4 @@
 'use client';
-
-import * as React from 'react';
-import { ChevronDown, Plus } from 'lucide-react';
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +19,6 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '@/components/ui/avatar';
-import { Button } from '../ui/button';
 
 export function SidebarUserInfo() {
   return (

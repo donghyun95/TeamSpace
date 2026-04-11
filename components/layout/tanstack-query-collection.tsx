@@ -1,16 +1,11 @@
 import { WorkspaceMemberRole } from '@/lib/api/getWorkSpaceMemberRoleFetch';
 import { addMemberFetch } from '@/lib/api/invite/iviteaddmemberFetch';
+import { renameWorkspaceFetch } from '@/lib/api/renameWorkspaceFetch';
 import { searchUserFetch } from '@/lib/api/search/searchuserFetch';
-
+import { toast } from 'sonner';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 
 type InviteRole = 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
-
-type AddMemberParams = {
-  workspaceId: number;
-  inviteeUserId: string;
-  role: InviteRole;
-};
 
 export const addMemberMutation = () => {
   const queryClient = useQueryClient();
@@ -48,5 +43,37 @@ export function useWorkspaceMemberRole(workspaceId: number, userId: string) {
     queryKey: ['workspaceRole', workspaceId, userId],
     queryFn: () => WorkspaceMemberRole(workspaceId, userId),
     enabled: !!workspaceId && !!userId,
+  });
+}
+
+type RenameWorkspaceVariables = {
+  workspaceId: number;
+  name: string;
+  userId: string;
+};
+export function useRenameWorkspaceMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ workspaceId, name, userId }: RenameWorkspaceVariables) =>
+      renameWorkspaceFetch(workspaceId, name),
+
+    onSuccess: (_, variables) => {
+      toast.success('Success', {
+        position: 'top-center',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['initialPage', variables.userId],
+      });
+      // queryClient.invalidateQueries({
+      //   queryKey: ['workspaces'],
+      // });
+    },
+    onError: () => {
+      console.log('실패');
+      toast?.error?.('Failed WorkSpace Renaming', {
+        position: 'top-center',
+      });
+    },
   });
 }

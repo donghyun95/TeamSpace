@@ -21,3 +21,14 @@ export async function getUserWorkspaceRole(
 
   return membership.role;
 }
+
+export async function renameWorkspace(workspaceId: number, name: string) {
+  return await prisma.workspace.update({
+    where: {
+      id: workspaceId,
+    },
+    data: {
+      name,
+    },
+  });
+}

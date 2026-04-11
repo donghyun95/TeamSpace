@@ -21,14 +21,8 @@ function throttle<T extends (...args: any[]) => void>(fn: T, delay: number) {
 
 function CursorLayer() {
   const others = useOthers();
-  console.log(
-    others.map((o) => ({
-      id: o.connectionId,
-      cursor: o.presence.cursor,
-    })),
-  );
   // 다른 사용자가 없으면 아무것도 렌더링하지 않음
-  if (others.length === 0) return null;
+  // if (others.length === 0) return null;
 
   return (
     <>
@@ -61,7 +55,7 @@ export function EditorWrapper({ children }) {
         updateMyPresence({
           cursor: { x, y },
         });
-      }, 10),
+      }, 25),
     [updateMyPresence],
   );
 

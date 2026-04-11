@@ -93,7 +93,7 @@ export async function getPageAncestorPath(
   userId: string,
   pageId: number,
 ): Promise<{}> {
-  const path: [] = [];
+  const path = [];
 
   let current = await prisma.page.findFirst({
     where: {
