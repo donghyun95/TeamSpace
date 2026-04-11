@@ -33,24 +33,27 @@ function throttle<T extends (...args: any[]) => void>(fn: T, delay: number) {
   };
 }
 
-const CursorLayer = memo(function CursorLayer({ propsRect }) {
+function CursorLayer({ propsRect }) {
   const others = useOthers();
 
-  const cursorElements = useMemo(() => {
-    return others
-      .filter((other) => other.presence.cursor != null)
-      .map(({ connectionId, presence }) => (
-        <FloatingCursor
-          key={connectionId}
-          x={presence.cursor!.x * propsRect.width + propsRect.left}
-          y={presence.cursor!.y * propsRect.height + propsRect.top}
-        />
-      ));
-  }, [others, propsRect]);
+  // 다른 사용자가 없으면 아무것도 렌더링하지 않음
   if (others.length === 0) return null;
-  return <>{cursorElements}</>;
-});
 
+  return (
+    <>
+      {others
+        .filter((other) => other.presence.cursor != null)
+        .map(({ connectionId, presence }) => (
+          <FloatingCursor
+            key={connectionId}
+            // 기존 계산 로직 그대로 유지
+            x={presence.cursor!.x * propsRect.width + propsRect.left}
+            y={presence.cursor!.y * propsRect.height + propsRect.top}
+          />
+        ))}
+    </>
+  );
+}
 export function EditorWrapper({ children }) {
   const isCursorOn = useSelectedData((state) => state.isCursorOn);
   const setisCursorOn = useSelectedData((state) => state.setisCursorOn);
@@ -75,6 +78,7 @@ export function EditorWrapper({ children }) {
   const updateRect = (el) => {
     if (!el) return;
     const r = el.getBoundingClientRect();
+    // console.log(r.width, r.height, r.left, r.top);
     setRect((prev) => {
       if (
         prev.width === r.width &&
@@ -98,7 +102,6 @@ export function EditorWrapper({ children }) {
       debounce(() => {
         if (!contentRef.current) return;
         updateRect(contentRef.current);
-        console.log('디바운스실행');
       }, 1000),
     [],
   );
@@ -121,7 +124,7 @@ export function EditorWrapper({ children }) {
       const x = (e.clientX - r.left) / r.width;
       const y = (e.clientY - r.top) / r.height;
       throttledUpdate(x, y);
-      console.log(y);
+      console.log(e.clientY - r.top, r.height);
     },
     [throttledUpdate],
   );
@@ -139,21 +142,32 @@ export function EditorWrapper({ children }) {
       if (!isCursorOn) setisCursorOn(true);
     }, 3000);
     const el = contentRef.current;
-    console.log(el);
     return () => clearTimeout(timer);
   }, [setisCursorOn]);
   useEffect(() => {
     const el = contentRef.current;
     if (!el) return;
-    updateRect(el);
+
+    // ResizeObserver는 요소의 크기가 변할 때마다 실행됩니다. (초기 렌더링 포함)
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height, left, top } =
+          entry.target.getBoundingClientRect();
+        setRect({ width, height, left, top });
+        console.log('크기 업데이트 완료:', height);
+      }
+    });
+
+    observer.observe(el);
+
+    // 스크롤은 크기 변화가 아니므로 따로 리스너 유지 (필요 시)
     window.addEventListener('scroll', debouncedUpdateRect);
-    window.addEventListener('resize', debouncedUpdateRect);
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('scroll', debouncedUpdateRect);
-      window.removeEventListener('resize', debouncedUpdateRect);
     };
-  }, []);
+  }, [debouncedUpdateRect]); // 의존성 배열 확인
   return (
     <>
       <div className="relative page">
