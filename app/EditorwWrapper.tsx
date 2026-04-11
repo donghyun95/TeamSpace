@@ -33,7 +33,7 @@ function throttle<T extends (...args: any[]) => void>(fn: T, delay: number) {
   };
 }
 
-function CursorLayer({ propsRect }) {
+function CursorLayer() {
   const others = useOthers();
 
   // 다른 사용자가 없으면 아무것도 렌더링하지 않음
@@ -47,8 +47,8 @@ function CursorLayer({ propsRect }) {
           <FloatingCursor
             key={connectionId}
             // 기존 계산 로직 그대로 유지
-            x={presence.cursor!.x * propsRect.width + propsRect.left}
-            y={presence.cursor!.y * propsRect.height + propsRect.top}
+            x={presence.cursor!.x}
+            y={presence.cursor!.y}
           />
         ))}
     </>
@@ -64,55 +64,18 @@ export function EditorWrapper({ children }) {
     staleTime: 0,
     enabled: true,
   });
-  // console.log('에디터', editor);
-  // const ready = useIsEditorReady();
+  const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [rect, setRect] = useState({
-    width: 0,
-    height: 0,
-    left: 0,
-    top: 0,
-  });
+
   const role = selfAndChildren.self?.role;
   const updateMyPresence = useUpdateMyPresence();
-  const updateRect = (el) => {
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    // console.log(r.width, r.height, r.left, r.top);
-    setRect((prev) => {
-      if (
-        prev.width === r.width &&
-        prev.height === r.height &&
-        prev.left === r.left &&
-        prev.top === r.top
-      ) {
-        return prev;
-      }
-
-      return {
-        width: r.width,
-        height: r.height,
-        left: r.left,
-        top: r.top,
-      };
-    });
-  };
-  const debouncedUpdateRect = useMemo(
-    () =>
-      debounce(() => {
-        if (!contentRef.current) return;
-        updateRect(contentRef.current);
-      }, 1000),
-    [],
-  );
-
   const throttledUpdate = useMemo(
     () =>
       throttle((x: number, y: number) => {
         updateMyPresence({
           cursor: { x, y },
         });
-      }, 50),
+      }, 10),
     [updateMyPresence],
   );
 
@@ -124,7 +87,6 @@ export function EditorWrapper({ children }) {
       const x = (e.clientX - r.left) / r.width;
       const y = (e.clientY - r.top) / r.height;
       throttledUpdate(x, y);
-      console.log(e.clientY - r.top, r.height);
     },
     [throttledUpdate],
   );
@@ -132,11 +94,6 @@ export function EditorWrapper({ children }) {
     updateMyPresence({ cursor: null });
   }, [updateMyPresence]);
 
-  useLayoutEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-    updateRect(el);
-  }, []);
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!isCursorOn) setisCursorOn(true);
@@ -144,33 +101,41 @@ export function EditorWrapper({ children }) {
     const el = contentRef.current;
     return () => clearTimeout(timer);
   }, [setisCursorOn]);
+
+  const updateRectStyles = useCallback(() => {
+    const el = contentRef.current;
+    const wrapper = containerRef.current;
+    if (!el || !wrapper) return;
+
+    const r = el.getBoundingClientRect();
+    // React State 대신 CSS 변수 직접 수정 (리렌더링 유발 X)
+    wrapper.style.setProperty('--rect-width', `${r.width}px`);
+    wrapper.style.setProperty('--rect-height', `${r.height}px`);
+    wrapper.style.setProperty('--rect-left', `${r.left}px`);
+    wrapper.style.setProperty('--rect-top', `${r.top}px`);
+  }, []);
+
   useEffect(() => {
     const el = contentRef.current;
     if (!el) return;
 
-    // ResizeObserver는 요소의 크기가 변할 때마다 실행됩니다. (초기 렌더링 포함)
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height, left, top } =
-          entry.target.getBoundingClientRect();
-        setRect({ width, height, left, top });
-        console.log('크기 업데이트 완료:', height);
-      }
+    const observer = new ResizeObserver(() => {
+      updateRectStyles();
     });
 
     observer.observe(el);
 
-    // 스크롤은 크기 변화가 아니므로 따로 리스너 유지 (필요 시)
-    window.addEventListener('scroll', debouncedUpdateRect);
+    window.addEventListener('scroll', updateRectStyles);
 
     return () => {
       observer.disconnect();
-      window.removeEventListener('scroll', debouncedUpdateRect);
+      window.removeEventListener('scroll', updateRectStyles);
     };
-  }, [debouncedUpdateRect]); // 의존성 배열 확인
+  }, [updateRectStyles]);
+
   return (
     <>
-      <div className="relative page">
+      <div ref={containerRef} className="relative page">
         <PopOverEmoticon />
 
         <div
@@ -181,8 +146,8 @@ export function EditorWrapper({ children }) {
         >
           {children}
         </div>
+        {isCursorOn && <CursorLayer />}
       </div>
-      {isCursorOn && <CursorLayer propsRect={rect} />}
     </>
   );
 }

@@ -9,16 +9,16 @@ export default function FloatingCursor({
   y,
   label = '다른 사용자',
 }: FloatingCursorProps) {
-  console.log(y);
   return (
     <div
       style={{
         position: 'fixed',
-        left: x,
-        top: y,
+        left: 0,
+        top: 0,
         pointerEvents: 'none',
         zIndex: 9999,
-        transform: 'translate(-2px, -2px)',
+        transform: `translate3d(calc(var(--rect-left) + ${x} * var(--rect-width)), calc(var(--rect-top) + ${y} * var(--rect-height)), 0)`,
+        willChange: 'transform',
       }}
     >
       <div
