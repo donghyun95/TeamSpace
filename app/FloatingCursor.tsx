@@ -1,13 +1,15 @@
 type FloatingCursorProps = {
   x: number;
   y: number;
-  label?: string;
+  color?: string; // 여기로 색상 받기
+  image?: string;
 };
 
 export default function FloatingCursor({
   x,
   y,
-  label = '다른 사용자',
+  color = '#3b82f6', // 기본값 (적당히 세련된 파랑),
+  image,
 }: FloatingCursorProps) {
   return (
     <div
@@ -19,48 +21,45 @@ export default function FloatingCursor({
         zIndex: 9999,
         transform: `translate3d(calc(var(--rect-left) + ${x} * var(--rect-width)), calc(var(--rect-top) + ${y} * var(--rect-height)), 0)`,
         willChange: 'transform',
-        transition: 'transform 0.1s ease',
+        transition: 'transform 0.025s linear',
       }}
     >
-      <div
+      <svg
+        width="26"
+        height="34"
+        viewBox="0 0 26 34"
+        xmlns="http://www.w3.org/2000/svg"
         style={{
-          position: 'relative',
-          width: 20,
-          height: 20,
+          display: 'block',
+          overflow: 'visible',
+          filter:
+            'drop-shadow(0 1px 1px rgba(0,0,0,0.22)) drop-shadow(0 4px 10px rgba(0,0,0,0.12))',
         }}
       >
-        <div
-          style={{
-            width: 0,
-            height: 0,
-            borderLeft: '3px solid transparent',
-            borderRight: '7px solid transparent',
-            borderTop: '14px solid #3b82f6',
-            transform: 'rotate(-45deg)',
-            transformOrigin: 'top left',
-            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))',
-          }}
-        />
-      </div>
+        <defs>
+          {/* 색상 기반 그라데이션 */}
+          <linearGradient id="cursor-fill" x1="0" y1="0" x2="0.8" y2="1">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="30%" stopColor={color} />
+            <stop offset="100%" stopColor={color} />
+          </linearGradient>
+        </defs>
 
-      <div
-        style={{
-          marginTop: 2,
-          marginLeft: 12,
-          display: 'inline-block',
-          padding: '4px 8px',
-          borderRadius: 9999,
-          background: '#3b82f6',
-          color: '#fff',
-          fontSize: 12,
-          fontWeight: 600,
-          lineHeight: 1.2,
-          whiteSpace: 'nowrap',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-        }}
-      >
-        {label}
-      </div>
+        {/* 메인 커서 */}
+        <path
+          d="M5.2 3.2C5.2 2.4 6.1 1.9 6.8 2.4L21.1 12.4C21.9 13 21.5 14.2 20.5 14.3L14.4 14.7C13.9 14.7 13.4 15 13.2 15.5L10.7 22C10.3 22.9 9 22.9 8.6 22L3.5 4.4C3.4 4 3.5 3.6 3.8 3.4C4.2 3.1 4.7 3 5.2 3.2Z"
+          fill="url(#cursor-fill)"
+          stroke="#111111"
+          strokeWidth="1.75"
+          strokeLinejoin="round"
+        />
+
+        {/* 하이라이트 (이거 없으면 바로 촌스러워짐) */}
+        <path
+          d="M6.5 4.8L18.4 13.1L13.5 13.4C12.5 13.5 11.7 14.1 11.3 15L9.5 19.7L5.3 5.4C5.2 5.1 5.3 4.9 5.5 4.8C5.7 4.6 6.1 4.6 6.5 4.8Z"
+          fill="rgba(255,255,255,0.55)"
+        />
+      </svg>
     </div>
   );
 }

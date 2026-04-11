@@ -35,8 +35,6 @@ export default async function RootLayout({
     redirect('/login');
   }
   const sidebarData = await getSidebarData(session?.user?.id);
-  // const path = await getPageAncestorPath(session?.user?.id, pageId);
-  // const childrenPages = await getChildrenPageByParentsId(5);
   return (
     <SelectedDataProvider initialPage={sidebarData}>
       <SidebarProvider>

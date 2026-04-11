@@ -59,6 +59,7 @@ model User {
   password    String?
   name        String?
   image       String?
+  color       String?
   emailVerified DateTime?
   sentWorkspaceInvites     WorkspaceInvite[] @relation("WorkspaceInviteInviter")
   receivedWorkspaceInvites WorkspaceInvite[] @relation("WorkspaceInviteInvitee")

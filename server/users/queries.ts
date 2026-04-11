@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { hashPassword } from '@/lib/password';
 import { createId } from '@paralleldrive/cuid2';
 import { WorkspaceType, WorkspaceRole } from '@prisma/client';
+import { generatePremiumHexColor } from '@/lib/common';
+
 export async function getUsers() {
   return prisma.user.findMany({
     select: {
@@ -33,7 +35,7 @@ export async function registerUser({
   }
   const randomImageSeed = createId();
   const hashedPassword = await hashPassword(password);
-
+  const color = generatePremiumHexColor();
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
@@ -41,6 +43,7 @@ export async function registerUser({
         password: hashedPassword,
         name,
         image: `https://api.dicebear.com/9.x/pixel-art/svg?seed=TeamSpace-${randomImageSeed}&radius=50&backgroundColor=b6e3f4,c0aede,d1d4f9`,
+        color,
       },
     });
 

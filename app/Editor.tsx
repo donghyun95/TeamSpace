@@ -30,16 +30,19 @@ const schema = BlockNoteSchema.create({
 
 export function Editor({ role }) {
   const editor = useCreateBlockNoteWithLiveblocks(
-    { schema },
+    { schema, uploadFile },
     { mentions: false },
   ) as BlockNoteEditor;
-
   return (
     <>
       <TitleInput editor={editor} />
-      <BlockNoteView editor={editor} className="editor" />
+      <BlockNoteView
+        editor={editor}
+        className="editor"
+        editable={role !== 'VIEWER'}
+      />
     </>
   );
 }
 //
-// editable={role === 'VIEWER' ? false : true}
+//

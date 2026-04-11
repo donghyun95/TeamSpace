@@ -1,6 +1,7 @@
 import { Liveblocks } from '@liveblocks/node';
 import { auth } from '@/lib/auth';
 import { getUserPageAccess, assertPagePublished } from '@/server/users/queries';
+import { generatePremiumHexColor } from '@/lib/common';
 
 const liveblocks = new Liveblocks({
   secret: process.env.LIVEBLOCKS_SECRET_KEY!,
@@ -13,30 +14,31 @@ export async function POST(req: Request) {
   // 실제 서비스면 session에서 userId 뽑아오면 됨
 
   const userId = authsession?.user?.id;
-  const userName = authsession?.user?.name;
+  const userName = String(authsession?.user?.name);
   console.log('auth', authsession);
   const pageId = Number(room);
 
-  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ff00ff'];
-  const color = colors[Math.floor(Math.random() * colors.length)];
+  const color = String(authsession?.user?.color);
+  const image = String(authsession?.user?.image);
   if (!userId) {
     try {
-      assertPagePublished(pageId);
+      await assertPagePublished(pageId);
+
+      const guest = `guest-${crypto.randomUUID()}`;
+      const session = liveblocks.prepareSession(guest, {
+        userInfo: {
+          name: 'guest',
+          color: generatePremiumHexColor(),
+          image: `https://api.dicebear.com/9.x/adventurer/svg?seed=${Math.random().toString(36).slice(2)}`,
+        },
+      });
+
+      session.allow(room, session.READ_ACCESS);
+      const { status, body } = await session.authorize();
+      return new Response(body, { status });
     } catch (error) {
       return new Response('Unauthorized', { status: 403 });
     }
-    const guest = `guest-${crypto.randomUUID()}`;
-    const session = liveblocks.prepareSession(guest, {
-      userInfo: {
-        name: guest,
-        color,
-        // avatar: "https://..." // 원하면 추가
-      },
-    });
-
-    session.allow(room, session.READ_ACCESS);
-    const { status, body } = await session.authorize();
-    return new Response(body, { status });
   }
 
   // ✅ 핵심: userInfo로 name/color 넘김
@@ -46,6 +48,7 @@ export async function POST(req: Request) {
       userInfo: {
         name: userName,
         color,
+        image,
         // avatar: "https://..." // 원하면 추가
       },
     });

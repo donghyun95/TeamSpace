@@ -1,21 +1,10 @@
 'use client';
 
 import { useUpdateMyPresence, useOthers } from '@liveblocks/react/suspense';
-import {
-  ReactNode,
-  useRef,
-  memo,
-  useMemo,
-  useCallback,
-  useEffect,
-  useState,
-  useLayoutEffect,
-} from 'react';
+import { useRef, useMemo, useCallback, useEffect } from 'react';
 import FloatingCursor from './FloatingCursor';
 import { PopOverEmoticon } from './PopOverEmoticon';
 import { useSelectedData } from './Providers/ClientDataProvider';
-import { getSelfandChildrenFetch } from '@/lib/api/getSelfandChildrenFetch';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 function throttle<T extends (...args: any[]) => void>(fn: T, delay: number) {
   let lastCall = 0;
@@ -32,7 +21,12 @@ function throttle<T extends (...args: any[]) => void>(fn: T, delay: number) {
 
 function CursorLayer() {
   const others = useOthers();
-
+  console.log(
+    others.map((o) => ({
+      id: o.connectionId,
+      cursor: o.presence.cursor,
+    })),
+  );
   // 다른 사용자가 없으면 아무것도 렌더링하지 않음
   if (others.length === 0) return null;
 
@@ -40,12 +34,14 @@ function CursorLayer() {
     <>
       {others
         .filter((other) => other.presence.cursor != null)
-        .map(({ connectionId, presence }) => (
+        .map(({ connectionId, presence, info }) => (
           <FloatingCursor
             key={connectionId}
             // 기존 계산 로직 그대로 유지
             x={presence.cursor!.x}
             y={presence.cursor!.y}
+            color={info.color}
+            image={info.image}
           />
         ))}
     </>
@@ -54,17 +50,10 @@ function CursorLayer() {
 export function EditorWrapper({ children }) {
   const isCursorOn = useSelectedData((state) => state.isCursorOn);
   const setisCursorOn = useSelectedData((state) => state.setisCursorOn);
-  const pageNodeID = useSelectedData((state) => state.pageNodeID);
-  const { data: selfAndChildren = { self: {}, children: [] } } = useQuery({
-    queryKey: ['page', Number(pageNodeID)],
-    queryFn: () => getSelfandChildrenFetch(String(pageNodeID)),
-    staleTime: 0,
-    enabled: true,
-  });
+
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const role = selfAndChildren.self?.role;
   const updateMyPresence = useUpdateMyPresence();
   const throttledUpdate = useMemo(
     () =>
@@ -122,10 +111,11 @@ export function EditorWrapper({ children }) {
     observer.observe(el);
 
     window.addEventListener('scroll', updateRectStyles);
-
+    window.addEventListener('resize', updateRectStyles);
     return () => {
       observer.disconnect();
       window.removeEventListener('scroll', updateRectStyles);
+      window.removeEventListener('resize', updateRectStyles);
     };
   }, [updateRectStyles]);
 
@@ -146,11 +136,4 @@ export function EditorWrapper({ children }) {
       </div>
     </>
   );
-}
-function debounce(fn, delay) {
-  let timer;
-  return () => {
-    clearTimeout(timer);
-    timer = setTimeout(fn, delay);
-  };
 }
