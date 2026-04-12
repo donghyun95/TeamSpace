@@ -31,7 +31,7 @@ export default async function Page({
   return (
     <Room PageId={PageId}>
       <EditorWrapper>
-        <ClientOnlyEditor role={'VIEWER'} />
+        <ClientOnlyEditor />
       </EditorWrapper>
     </Room>
   );

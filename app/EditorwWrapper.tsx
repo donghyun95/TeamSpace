@@ -62,13 +62,13 @@ export function EditorWrapper({ children }) {
     updateMyPresence({ cursor: null });
   }, [updateMyPresence]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isCursorOn) setisCursorOn(true);
-    }, 3000);
-    const el = contentRef.current;
-    return () => clearTimeout(timer);
-  }, [setisCursorOn]);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     if (!isCursorOn) setisCursorOn(true);
+  //   }, 3000);
+  //   const el = contentRef.current;
+  //   return () => clearTimeout(timer);
+  // }, [setisCursorOn]);
 
   const updateRectStyles = useCallback(() => {
     const el = contentRef.current;

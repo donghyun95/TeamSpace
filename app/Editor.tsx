@@ -2,10 +2,16 @@
 
 import { useEffect } from 'react';
 import { BlockNoteView } from '@blocknote/mantine';
-import { useCreateBlockNoteWithLiveblocks } from '@liveblocks/react-blocknote';
+import {
+  useCreateBlockNoteWithLiveblocks,
+  useIsEditorReady,
+} from '@liveblocks/react-blocknote';
 import { BlockNoteEditor } from '@blocknote/core';
 import { BlockNoteSchema, defaultBlockSpecs } from '@blocknote/core';
 import { TitleInput } from './TitleInput';
+import { useSelectedData } from './Providers/ClientDataProvider';
+import { EditorSkeleton } from './EditorSkeleton';
+EditorSkeleton;
 async function uploadFile(file: File) {
   const body = new FormData();
   body.append('file', file);
@@ -33,6 +39,12 @@ export function Editor({ role }) {
     { schema, uploadFile },
     { mentions: false },
   ) as BlockNoteEditor;
+  const setisCursorOn = useSelectedData((state) => state.setisCursorOn);
+  const isReady = useIsEditorReady();
+  useEffect(() => {
+    setisCursorOn(true);
+    return () => setisCursorOn(false);
+  }, [isReady]);
   return (
     <>
       <TitleInput editor={editor} />

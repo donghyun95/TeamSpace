@@ -20,6 +20,5 @@ export function ClientOnlyEditor() {
     enabled: true,
   });
   const role = selfAndChildren.role;
-  console.log('부모', role);
   return <Editor role={role} />;
 }
