@@ -89,7 +89,7 @@ export function LoginForm({
   return (
     <div
       className={cn(
-        'relative min-h-screen overflow-hidden bg-[#f7f9fb] text-[#545f73] selection:bg-[#2563EB]/20',
+        'relative min-h-screen overflow-hidden bg-[#fafaf5] text-[#545f73] selection:bg-[#4e45e4]/20',
         className,
       )}
       {...props}
@@ -102,21 +102,21 @@ export function LoginForm({
         <nav>
           <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-8 md:py-5">
             <div className="flex items-center gap-2 font-headline text-xl font-extrabold text-[#545f73]">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#2563EB] text-[10px] text-white">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#4e45e4] text-[10px] text-white">
                 TS
               </span>
               TeamSpace
             </div>
 
             <div className="flex items-center gap-4 md:gap-6">
-              <a className="hidden text-xs font-bold text-[#566166] hover:text-[#2563EB] sm:block">
+              <a className="hidden text-xs font-bold text-[#566166] hover:text-[#4e45e4] sm:block">
                 Features
               </a>
-              <a className="hidden text-xs font-bold text-[#566166] hover:text-[#2563EB] sm:block">
+              <a className="hidden text-xs font-bold text-[#566166] hover:text-[#4e45e4] sm:block">
                 About
               </a>
 
-              <div className="[&_button]:rounded-full [&_button]:bg-[#545f73] [&_button]:px-5 [&_button]:py-2 [&_button]:text-xs [&_button]:text-white">
+              <div className="[&_button]:rounded-full [&_button]:bg-[#4e45e4] [&_button]:px-5 [&_button]:py-2 [&_button]:text-xs [&_button]:text-white">
                 <SignUpDialog />
               </div>
             </div>
@@ -129,7 +129,7 @@ export function LoginForm({
             {/* hero */}
             <div className="mb-5 text-center">
               <h1 className="mb-3 text-2xl font-extrabold text-[#545f73] sm:text-3xl md:text-4xl">
-                Welcome to <span className="text-[#2563EB]">TeamSpace</span>
+                Welcome to <span className="text-[#4e45e4]">TeamSpace</span>
               </h1>
               <p className="text-xs text-[#566166]/80 md:text-sm">
                 Access your digital curator and manage your team&apos;s workflow
@@ -179,7 +179,7 @@ export function LoginForm({
                           <Lock className="h-4 w-4" />
                           Password
                         </div>
-                        <span className="text-[#2563EB] text-[10px]">
+                        <span className="text-[#4e45e4] text-[10px]">
                           Forgot
                         </span>
                       </div>
@@ -199,20 +199,22 @@ export function LoginForm({
 
                 {/* captcha */}
                 <Field>
-                  <TurnstileWidget
-                    onVerify={setToken}
-                    handleSubmitError={setSubmitError}
-                  />
-                  {submitError && (
-                    <FieldError errors={[{ message: submitError }]} />
-                  )}
+                  <div className="flex justify-center items-center">
+                    <TurnstileWidget
+                      onVerify={setToken}
+                      handleSubmitError={setSubmitError}
+                    />
+                    {submitError && (
+                      <FieldError errors={[{ message: submitError }]} />
+                    )}
+                  </div>
                 </Field>
 
                 {/* login */}
                 <Button
                   type="submit"
                   disabled={!token || isSubmitting}
-                  className="h-10 w-full text-sm bg-[#2563EB] text-white"
+                  className="h-10 w-full text-sm bg-[#4e45e4] text-white"
                 >
                   {isSubmitting ? 'Logging...' : 'Login'}
                 </Button>

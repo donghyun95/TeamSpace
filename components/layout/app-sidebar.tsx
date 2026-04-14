@@ -60,6 +60,8 @@ export function AppSidebar({
   if (!searchParamsPageId) {
   }
   const userId = session?.user.id;
+  const userImage = session?.user.image;
+  const userName = session?.user.name;
   const { data: user } = useQuery({
     queryKey: ['initialPage', userId],
     queryFn: getSidebarData,
@@ -104,12 +106,13 @@ export function AppSidebar({
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader className="px-2 py-2">
-        <SidebarUserInfo />
+        <SidebarUserInfo name={userName} image={userImage} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarUtilities />
         <Separator className="my-2 bg-stone-200" />
         <NavWorkspaces workspaces={user.workspaces} userId={userId} />
+        <Separator className="my-1 bg-stone-200" />
         <NavPersonalSpace pages={user.personal.rootPages} />
       </SidebarContent>
       <SidebarRail />

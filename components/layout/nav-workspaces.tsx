@@ -243,12 +243,8 @@ export function NavWorkspaces({ workspaces, userId }: NavWorkspacesProps) {
           <CollapsibleTrigger asChild>
             <button
               type="button"
-              className="group/trigger flex h-8 items-center gap-2 rounded-sm px-2 hover:bg-sidebar-accent"
+              className="group/trigger flex h-8 items-center gap-2 rounded-sm px-2"
             >
-              <div className="flex h-[18px] w-[18px]">
-                <Folder className="h-[18px] w-[18px] text-yellow-500 fill-yellow-200 group-data-[state=open]/trigger:hidden" />
-                <FolderOpen className="h-[18px] w-[18px] text-yellow-500 fill-yellow-200 hidden group-data-[state=open]/trigger:block" />
-              </div>
               <span className="text-sm">Workspaces</span>
             </button>
           </CollapsibleTrigger>
@@ -264,7 +260,7 @@ export function NavWorkspaces({ workspaces, userId }: NavWorkspacesProps) {
 
         <CollapsibleContent>
           <div className="mt-1 space-y-1">
-            {workspaces.map((workspace) => (
+            {workspaces.map((workspace, index) => (
               <WorkSpaceFolder
                 key={workspace.id}
                 workSpaceName={workspace.name}
@@ -326,7 +322,7 @@ function WorkSpaceFolder({
   };
   return (
     <>
-      <SidebarGroupContent>
+      <SidebarGroupContent style={{ paddingLeft: INDENT_SIZE }}>
         <SidebarMenu>
           <SidebarMenuItem className="w-full list-none">
             <Collapsible
@@ -339,7 +335,10 @@ function WorkSpaceFolder({
                   <CollapsibleTrigger asChild>
                     <button className="group/trigger flex w-full items-center">
                       <div className="flex h-8 w-5 shrink-0 items-center justify-center">
-                        <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/trigger:rotate-90" />
+                        <div className="flex h-[18px] w-[18px]">
+                          <Folder className="h-[18px] w-[18px] text-yellow-400 fill-yellow-200 group-data-[state=open]/trigger:hidden" />
+                          <FolderOpen className="h-[18px] w-[18px] text-yellow-400 fill-yellow-200 hidden group-data-[state=open]/trigger:block" />
+                        </div>
                       </div>
 
                       <div className="min-w-0 flex-1 px-2 text-left">
@@ -379,7 +378,7 @@ function WorkSpaceFolder({
               <CollapsibleContent>
                 <SidebarMenu>
                   {rootPage.map((page) => (
-                    <PageTreeNode key={page.id} page={page} depth={0} />
+                    <PageTreeNode key={page.id} page={page} depth={1} />
                   ))}
                 </SidebarMenu>
               </CollapsibleContent>

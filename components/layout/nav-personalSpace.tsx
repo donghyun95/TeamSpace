@@ -7,6 +7,8 @@ import {
   Plus,
   Folder,
   FolderOpen,
+  UserRound,
+  User2,
 } from 'lucide-react';
 
 import {
@@ -272,11 +274,10 @@ export function NavPersonalSpace({ pages }: NavPersonalSpaceProps) {
           <CollapsibleTrigger asChild>
             <button
               type="button"
-              className="group/trigger flex h-8 items-center gap-2 rounded-sm px-2 hover:bg-sidebar-accent"
+              className="group/trigger flex h-8 items-center gap-2 rounded-sm pl-3"
             >
               <div className="flex h-[18px] w-[18px]">
-                <Folder className="h-[18px] w-[18px] text-yellow-500 fill-yellow-200 group-data-[state=open]/trigger:hidden" />
-                <FolderOpen className="h-[18px] w-[18px] text-yellow-500 fill-yellow-200 hidden group-data-[state=open]/trigger:block" />
+                <User2 className="h-[18px] w-[18px] text-indigo-500 fill-indigo-500" />
               </div>
               <span className="text-sm">Personl Space</span>
             </button>
@@ -295,7 +296,7 @@ export function NavPersonalSpace({ pages }: NavPersonalSpaceProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {pages.map((page) => (
-                <PageTreeNode key={page.id} page={page} depth={0} />
+                <PageTreeNode key={page.id} page={page} depth={2} />
               ))}
               <SidebarMenuItem>
                 <SidebarMenuButton className="text-sidebar-foreground/70">
