@@ -69,7 +69,7 @@ export function TitleInput({ editor }) {
     setTitle(selfAndChildren.self.title ?? '');
   }, [pageNodeID, selfAndChildren.self.title]);
   return (
-    <div className="editor pb-[5px]">
+    <div className="editor mx-auto mb-10">
       {selfAndChildren.role === 'VIEWER' ? (
         <h1 className="title px-[54px]">{title}</h1>
       ) : (

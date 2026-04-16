@@ -91,7 +91,7 @@ export function PopOverEmoticon() {
   }, [selfAndChildren]);
 
   return (
-    <div className="w-[1000px] mx-auto mt-20 mb-2">
+    <div className="editor mt-20 mb-10 mx-auto">
       <div className="px-[54px]">
         {selfAndChildren.role === 'VIEWER' ? (
           <span className="text-5xl">{Emoticon}</span>
@@ -114,8 +114,11 @@ function EmojiPopover({
     <Popover>
       <PopoverTrigger asChild>
         {icon ? (
-          <Button variant="ghost" className="group h-14 w-14 p-0">
-            <span className="text-5xl">{icon}</span>
+          <Button
+            variant="ghost"
+            className="h-14 w-14 hover:bg-transparent hover:text-inherit"
+          >
+            <span className="text-7xl">{icon}</span>
           </Button>
         ) : (
           <Button

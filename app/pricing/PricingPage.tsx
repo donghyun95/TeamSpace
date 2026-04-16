@@ -244,11 +244,9 @@ export default function TeamSpacePricingPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button className="rounded-xl bg-[#4e45e4] px-5 text-white shadow-lg shadow-[#4e45e4]/20 hover:bg-[#4135d8]">
-                Get Started
-              </Button>
-            </Link>
+            <button className="bg-[#4e45e4] text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:opacity-90 transition-opacity shadow-lg shadow-[#4e45e4]/20">
+              <Link href={`/login`}>Get Started</Link>
+            </button>
           </div>
         </div>
       </nav>

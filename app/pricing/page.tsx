@@ -1,4 +1,4 @@
-import Main from './main';
+import Main from './later';
 import TeamSpacePricingPage from './PricingPage';
 
 export default function Page() {

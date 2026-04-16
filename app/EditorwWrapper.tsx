@@ -6,7 +6,7 @@ import FloatingCursor from './FloatingCursor';
 import { PopOverEmoticon } from './PopOverEmoticon';
 import { useSelectedData } from './Providers/ClientDataProvider';
 import throttle from 'lodash/throttle';
-
+import { motion } from 'framer-motion';
 function CursorLayer() {
   const others = useOthers();
   // 다른 사용자가 없으면 아무것도 렌더링하지 않음
@@ -104,16 +104,19 @@ export function EditorWrapper({ children }) {
   return (
     <>
       <div ref={containerRef} className="relative page min-w-0">
-        <div
+        <motion.div
+          initial={{ x: 20, y: 20, opacity: 0 }} // 아래 + 투명
+          animate={{ x: 0, y: 0, opacity: 1 }} // 원래 위치 + 보이기
+          transition={{ duration: 0.5 }}
           ref={contentRef}
           onPointerMove={handlePointerMove}
           onPointerLeave={handlePointerLeave}
-          className="mx-auto w-[1200px] relative bg-white"
+          className="mx-auto max-w-[900px] min-h-[92vh] w-full relative bg-white"
         >
           <PopOverEmoticon />
           {children}
-        </div>
-        {/* {isCursorOn && <CursorLayer />} */}
+        </motion.div>
+        {isCursorOn && <CursorLayer />}
       </div>
     </>
   );
