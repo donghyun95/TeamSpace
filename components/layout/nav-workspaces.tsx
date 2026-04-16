@@ -86,6 +86,7 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
     staleTime: 1000 * 30,
     enabled: isOpen,
   });
+  const isActive = Number(page.id) === Number(pageNodeID);
   const icon = selfAndChildren?.self?.icon ?? page.icon ?? '📄';
   const queryClient = useQueryClient();
   const createChildMutation = useMutation({
@@ -169,8 +170,12 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
       >
         <div
           onClick={handleClickCursorOnOff}
-          data-active={Number(page.id) === pageNodeID}
-          className={`group/row grid w-full grid-cols-[1fr_32px] rounded-md items-center hover:bg-gray-100 data-[active=true]:hover:bg-gray-200 data-[active=true]:bg-gray-100`}
+          data-active={isActive}
+          className={`
+group/row grid w-full grid-cols-[1fr_32px] rounded-md items-center
+hover:bg-[#e7e9e2]
+data-[active=true]:bg-[#e0e4dc]
+`}
         >
           <div
             className="flex min-w-0 items-center"
@@ -194,7 +199,9 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
             <div className="min-w-0 h-8 flex-1 pr-2 hover:bg-transparent">
               <Link
                 href={`/dashboard/${session?.user.id}?PageId=${page.id}`}
-                className="pl-2 flex h-full min-w-0 flex-1 items-center truncate"
+                className={`pl-2 flex h-full min-w-0 flex-1 items-center truncate ${
+                  isActive ? 'text-[#4F46E5] font-medium' : 'text-[#30332e]'
+                }`}
                 title={page.title}
               >
                 {selfAndChildren?.self?.title ?? page.title ?? 'Untitled'}
@@ -245,7 +252,9 @@ export function NavWorkspaces({ workspaces, userId }: NavWorkspacesProps) {
               type="button"
               className="group/trigger flex h-8 items-center gap-2 rounded-sm px-2"
             >
-              <span className="text-sm">Workspaces</span>
+              <span className="text-[#5c605a]/60 text-xs font-bold uppercase tracking-widest">
+                Work spaces
+              </span>
             </button>
           </CollapsibleTrigger>
 
@@ -258,7 +267,7 @@ export function NavWorkspaces({ workspaces, userId }: NavWorkspacesProps) {
           </button>
         </div>
 
-        <CollapsibleContent>
+        <CollapsibleContent className="max-h-[225px] overflow-y-auto">
           <div className="mt-1 space-y-1">
             {workspaces.map((workspace, index) => (
               <WorkSpaceFolder
@@ -322,27 +331,30 @@ function WorkSpaceFolder({
   };
   return (
     <>
-      <SidebarGroupContent style={{ paddingLeft: INDENT_SIZE }}>
+      <SidebarGroupContent>
         <SidebarMenu>
-          <SidebarMenuItem className="w-full list-none">
+          <SidebarMenuItem className={`w-full list-none`}>
             <Collapsible
               className="w-full"
               open={isOpen}
               onOpenChange={handleOpenFolder}
             >
-              <div className="group/row flex w-full items-center rounded-md hover:bg-gray-100">
+              <div className="group/row flex w-full items-center rounded-md hover:bg-[#e7e9e2] ">
                 <div className="flex min-w-0 flex-1 items-center">
                   <CollapsibleTrigger asChild>
-                    <button className="group/trigger flex w-full items-center">
+                    <button
+                      className="group/trigger flex w-full items-center"
+                      style={{ marginLeft: INDENT_SIZE }}
+                    >
                       <div className="flex h-8 w-5 shrink-0 items-center justify-center">
                         <div className="flex h-[18px] w-[18px]">
-                          <Folder className="h-[18px] w-[18px] text-yellow-400 fill-yellow-200 group-data-[state=open]/trigger:hidden" />
-                          <FolderOpen className="h-[18px] w-[18px] text-yellow-400 fill-yellow-200 hidden group-data-[state=open]/trigger:block" />
+                          <Folder className="h-[18px] w-[18px] text-[#46655e] fill-[#d5f8ef] group-data-[state=open]/trigger:hidden" />
+                          <FolderOpen className="h-[18px] w-[18px] text-[#46655e] fill-[#d5f8ef] hidden group-data-[state=open]/trigger:block" />
                         </div>
                       </div>
 
                       <div className="min-w-0 flex-1 px-2 text-left">
-                        <span className="block truncate text-sm font-medium leading-none">
+                        <span className="block truncate text-sm font-medium leading-none text-[#30332e]">
                           {workSpaceName || 'My Workspace'}
                         </span>
                       </div>
@@ -356,7 +368,7 @@ function WorkSpaceFolder({
                       <button
                         onClick={handleOpenChange}
                         type="button"
-                        className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity cursor-pointer group-hover/row:opacity-100 hover:bg-sidebar-accent"
+                        className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity cursor-pointer group-hover/row:opacity-100 hover:bg-[#e7e9e2]"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </button>
@@ -367,7 +379,7 @@ function WorkSpaceFolder({
                     <button
                       onClick={handleCreateRootPage}
                       type="button"
-                      className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity cursor-pointer group-hover/row:opacity-100 hover:bg-sidebar-accent"
+                      className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity cursor-pointer group-hover/row:opacity-100 hover:bg-[#e7e9e2]"
                     >
                       <Plus className="h-4 w-4" />
                     </button>

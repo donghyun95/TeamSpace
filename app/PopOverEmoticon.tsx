@@ -91,8 +91,8 @@ export function PopOverEmoticon() {
   }, [selfAndChildren]);
 
   return (
-    <div className="emotiocnBox">
-      <div className="emoticonWrapper title">
+    <div className="w-[1000px] mx-auto mt-20 mb-2">
+      <div className="px-[54px]">
         {selfAndChildren.role === 'VIEWER' ? (
           <span className="text-5xl">{Emoticon}</span>
         ) : (

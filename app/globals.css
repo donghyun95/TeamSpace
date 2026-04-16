@@ -49,6 +49,8 @@
 }
 html {
   font-family: Pretendard, sans-serif;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 /* background: white; */
 /* @media (prefers-color-scheme: dark) {
@@ -60,7 +62,7 @@ html {
 .editor {
   position: relative;
   inset: 0;
-  width: 800px;
+  width: 1000px;
   margin: 0 auto;
 }
 

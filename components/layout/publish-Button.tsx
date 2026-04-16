@@ -1,5 +1,5 @@
 'use client';
-import { Check, Link2, Share2, Sparkles } from 'lucide-react';
+import { Check, Link2, Sparkles, Share2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -59,30 +59,31 @@ export function PublishButton({}: any) {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="ghost"
           size="sm"
-          className="h-10 px-4 gap-2 text-stone-600 hover:bg-stone-100"
+          className="
+      h-8 rounded-lg px-4
+      bg-[#4e45e4]
+      text-[#fbf7ff]
+      text-xs font-semibold
+      hover:bg-[#4135d8]
+      active:opacity-80
+      transition-all
+      shadow-none
+    "
         >
-          <Share2 className="h-4 w-4" />
-          <span className="text-sm font-medium">Share</span>
+          Share
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent
-        align="end"
-        sideOffset={10}
-        className="
-    w-[360px] p-0
-  "
-      >
+      <PopoverContent align="end" sideOffset={10} className="w-[360px] p-0">
         <div className="relative">
           <div className="absolute inset-x-0 top-0 h-24 from-zinc-100 via-white to-zinc-50" />
           <div className="relative p-5">
             <div className="mb-5 flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-zinc-900 text-white shadow-sm">
-                    <Sparkles className="h-4 w-4" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#4F46E5] text-white shadow-sm">
+                    <Share2 className="h-4 w-4 " />
                   </div>
                   <div>
                     <h3 className="text-[15px] font-semibold tracking-tight">
@@ -128,6 +129,10 @@ export function PublishButton({}: any) {
                   checked={publicData.ispublished ?? false}
                   onCheckedChange={handleTogglePublish}
                   disabled={toggleMutation.isPending}
+                  className="
+    data-[state=checked]:bg-[#4F46E5]
+    data-[state=unchecked]:bg-gray-300
+  "
                 />
               </div>
             </div>
@@ -162,8 +167,8 @@ export function PublishButton({}: any) {
                   disabled={!publicData.ispublished || !shareUrl}
                   className="
                     h-12 rounded-2xl px-4
-                    bg-zinc-900 text-white
-                    hover:bg-zinc-800
+                    bg-[#4F46E5] text-white
+                    hover:bg-[#3323CC]
                     shadow-[0_10px_24px_rgba(24,24,27,0.24)]
                     disabled:bg-zinc-200 disabled:text-zinc-400 disabled:shadow-none
                   "

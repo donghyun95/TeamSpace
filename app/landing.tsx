@@ -26,18 +26,18 @@ const Navbar = () => (
           TeamSpace
         </span>
         <div className="hidden md:flex items-center gap-8">
-          <a
+          <Link
             href="#"
             className="text-sm font-semibold text-[#4e45e4] border-b-2 border-[#4e45e4] pb-1"
           >
             Features
-          </a>
-          <a
-            href="#"
+          </Link>
+          <Link
+            href="/pricing"
             className="text-sm font-medium text-slate-500 hover:text-[#4e45e4] transition-colors"
           >
             Pricing
-          </a>
+          </Link>
         </div>
       </div>
       <div className="flex items-center gap-6">
@@ -71,9 +71,11 @@ const Hero = () => (
           environment.
         </p>
         <div className="flex flex-wrap gap-4">
-          <button className="bg-[#4e45e4] text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-[#4e45e4]/30 transition-all">
-            Create your space
-          </button>
+          <Link href="/login">
+            <button className="bg-[#4e45e4] text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-[#4e45e4]/30 transition-all">
+              Create your space
+            </button>
+          </Link>
           <button className="bg-white text-slate-900 px-8 py-4 rounded-2xl font-bold text-lg flex items-center gap-2 hover:bg-slate-50 transition-all border border-slate-200">
             <PlayCircle className="w-6 h-6" /> Watch Demo
           </button>
@@ -440,9 +442,11 @@ const CTA = () => (
           TeamSpace.
         </p>
         <div className="flex flex-col sm:flex-row gap-5 justify-center">
-          <button className="bg-white text-[#4e45e4] px-10 py-5 rounded-2xl font-bold text-xl hover:scale-105 transition-transform shadow-xl">
-            Create your space
-          </button>
+          <Link href="/login">
+            <button className="bg-white text-[#4e45e4] px-10 py-5 rounded-2xl font-bold text-xl hover:scale-105 transition-transform shadow-xl">
+              Create your space
+            </button>
+          </Link>
           <button className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-white/20 transition-all">
             Talk to Sales
           </button>

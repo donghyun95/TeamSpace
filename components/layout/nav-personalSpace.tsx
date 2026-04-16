@@ -70,6 +70,7 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
   const isOpen = useSelectedData((state) => state.openMap[page.id] ?? false);
   const setNodeOpen = useSelectedData((state) => state.setNodeOpen);
   const setisCursorOn = useSelectedData((state) => state.setisCursorOn);
+  const isActive = Number(page.id) === Number(pageNodeID);
   const { data: session, status } = useSession();
   //자식페이지 배열로 가져옴
   const { data: selfAndChildren } = useQuery({
@@ -144,8 +145,10 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
       >
         <div
           onClick={handleClickCursorOnOff}
-          data-active={Number(page.id) === pageNodeID}
-          className={`group/row grid w-full grid-cols-[1fr_32px] rounded-md items-center hover:bg-gray-100 data-[active=true]:hover:bg-gray-200 data-[active=true]:bg-gray-100`}
+          data-active={isActive}
+          className={`group/row grid w-full grid-cols-[1fr_32px] rounded-md items-center hover:bg-[#e7e9e2] ${
+            isActive ? 'bg-[#e0e4dc]' : ''
+          }`}
         >
           <div
             className="flex min-w-0 items-center"
@@ -163,7 +166,7 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
                   type="button"
                   className="group/trigger absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover/row:opacity-100"
                 >
-                  <ChevronRight className="h-4 w-4 transition-transform duration-200 group-data-[state=open]/trigger:rotate-90" />
+                  <ChevronRight className="h-4 w-4 text-[#5c605a] transition-transform duration-200 group-data-[state=open]/trigger:rotate-90" />
                 </button>
               </CollapsibleTrigger>
             </div>
@@ -171,7 +174,9 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
             <div className="min-w-0 h-8 flex-1 pr-2 hover:bg-transparent">
               <Link
                 href={`/dashboard/${session?.user.id}?PageId=${page.id}`}
-                className="pl-2 flex h-full min-w-0 flex-1 items-center truncate"
+                className={`pl-2 flex h-full min-w-0 flex-1 items-center truncate ${
+                  isActive ? 'text-[#4F46E5] font-medium' : 'text-[#30332e]'
+                }`}
                 title={page.title}
               >
                 {selfAndChildren?.self?.title || 'Untitled'}
@@ -185,7 +190,7 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
               onClick={handleCreateChild}
               className="flex h-8 w-8 items-center justify-center rounded-md opacity-0 transition-opacity group-hover/row:opacity-100 cursor-pointer"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 text-[#5c605a]" />
             </button>
           </div>
         </div>
@@ -274,12 +279,11 @@ export function NavPersonalSpace({ pages }: NavPersonalSpaceProps) {
           <CollapsibleTrigger asChild>
             <button
               type="button"
-              className="group/trigger flex h-8 items-center gap-2 rounded-sm pl-3"
+              className="group/trigger flex h-8 items-center gap-2 rounded-sm pl-2"
             >
-              <div className="flex h-[18px] w-[18px]">
-                <User2 className="h-[18px] w-[18px] text-indigo-500 fill-indigo-500" />
-              </div>
-              <span className="text-sm">Personl Space</span>
+              <span className="text-[#5c605a]/60 text-xs font-bold uppercase tracking-widest">
+                Personal Space
+              </span>
             </button>
           </CollapsibleTrigger>
 
@@ -292,11 +296,11 @@ export function NavPersonalSpace({ pages }: NavPersonalSpaceProps) {
           </button>
         </div>
 
-        <CollapsibleContent>
+        <CollapsibleContent className="max-h-[225px] overflow-y-auto">
           <SidebarGroupContent>
             <SidebarMenu>
               {pages.map((page) => (
-                <PageTreeNode key={page.id} page={page} depth={2} />
+                <PageTreeNode key={page.id} page={page} depth={1} />
               ))}
               <SidebarMenuItem>
                 <SidebarMenuButton className="text-sidebar-foreground/70">

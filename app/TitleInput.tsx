@@ -69,12 +69,12 @@ export function TitleInput({ editor }) {
     setTitle(selfAndChildren.self.title ?? '');
   }, [pageNodeID, selfAndChildren.self.title]);
   return (
-    <div className="titleWrapper">
+    <div className="editor pb-[5px]">
       {selfAndChildren.role === 'VIEWER' ? (
-        <h1 className="title">{title}</h1>
+        <h1 className="title px-[54px]">{title}</h1>
       ) : (
         <input
-          className="title"
+          className="title px-[54px]"
           onKeyDown={handleKeyDown}
           onChange={handleChange}
           maxLength={30}

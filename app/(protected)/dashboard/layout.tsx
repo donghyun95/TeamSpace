@@ -20,10 +20,10 @@ import {
   getChildrenPageByParentsId,
 } from '@/server/users/queries';
 import { NextResponse } from 'next/server';
-import { SelectedDataProvider } from '../Providers/ClientDataProvider';
 import { getPageAncestorPath } from '@/server/create/queries';
 import { Input } from '@/components/ui/input';
 import { Check, Search } from 'lucide-react';
+import { SelectedDataProvider } from '@/app/Providers/ClientDataProvider';
 
 export default async function RootLayout({
   children,
@@ -40,14 +40,14 @@ export default async function RootLayout({
       <SidebarProvider>
         <AppSidebar initialPage={sidebarData as any} />
         <SidebarInset>
-          <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center gap-2 bg-white">
-            <div className="flex items-center gap-2 px-3">
+          <header className="sticky top-0 z-50 grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-2 px-3">
+            <div className="flex min-w-0 items-center gap-2">
               <SidebarTrigger />
               <Separator
                 orientation="vertical"
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
-              <Breadcrumb>
+              <Breadcrumb className="min-w-0">
                 <BreadcrumbList>
                   <BreadcrumbItem>
                     <BreadcrumbPage className="line-clamp-1">
@@ -57,8 +57,12 @@ export default async function RootLayout({
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
-            <SearchBar />
-            <div className="ml-auto px-3">
+
+            <div className="justify-self-center min-w-0 w-[30rem] max-w-full">
+              <SearchBar />
+            </div>
+
+            <div className="justify-self-end px-3">
               <NavActions />
             </div>
           </header>
@@ -70,13 +74,13 @@ export default async function RootLayout({
 }
 function SearchBar() {
   return (
-    <div className="flex-1 max-w-md mx-4">
+    <div className="w-full">
       <div className="relative group">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 group-focus-within:text-stone-600 transition-colors" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5c605a] transition-colors" />
         <Input
           type="search"
           placeholder="Search"
-          className="w-full h-8 pl-9 bg-stone-100 border-none focus-visible:ring-1 focus-visible:ring-stone-300 rounded-md text-sm"
+          className="h-8 w-full rounded-md border-none bg-[#e0e4dc] pl-10 pr-4 text-sm text-[#30332e] placeholder:text-[#5c605a] shadow-none outline-none transition-all focus-visible:bg-[#ffffff] focus-visible:ring-2 focus-visible:ring-[#4e45e4]/20 focus-visible:ring-offset-0"
         />
       </div>
     </div>

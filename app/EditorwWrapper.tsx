@@ -10,7 +10,7 @@ import throttle from 'lodash/throttle';
 function CursorLayer() {
   const others = useOthers();
   // 다른 사용자가 없으면 아무것도 렌더링하지 않음
-  // if (others.length === 0) return null;
+  if (others.length === 0) return null;
 
   return (
     <>
@@ -103,18 +103,17 @@ export function EditorWrapper({ children }) {
 
   return (
     <>
-      <div ref={containerRef} className="relative page">
-        <PopOverEmoticon />
-
+      <div ref={containerRef} className="relative page min-w-0">
         <div
           ref={contentRef}
           onPointerMove={handlePointerMove}
           onPointerLeave={handlePointerLeave}
-          className="mx-auto w-[800px] relative"
+          className="mx-auto w-[1200px] relative bg-white"
         >
+          <PopOverEmoticon />
           {children}
         </div>
-        {isCursorOn && <CursorLayer />}
+        {/* {isCursorOn && <CursorLayer />} */}
       </div>
     </>
   );

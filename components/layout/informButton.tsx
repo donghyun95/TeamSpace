@@ -16,6 +16,17 @@ import {
   usePendingInvites,
 } from './tanstack-query-collection';
 
+const utilityItemClass = `
+  w-full justify-start gap-3
+  px-3 py-2 h-auto
+  rounded-lg
+  text-[#5c605a]
+  font-headline text-sm font-medium tracking-tight
+  hover:bg-[#e7e9e2] hover:text-[#5c605a]
+  active:scale-[0.98]
+  transition-colors duration-200
+`;
+
 type PendingInviteItem = {
   id: string;
   workspaceId: number;
@@ -228,10 +239,13 @@ export function NotificationButton() {
         <Button
           variant="ghost"
           size="sm"
-          className="relative h-10 gap-2 px-4 text-stone-600 hover:bg-stone-100"
+          className="relative h-10 gap-2 px-4 text-stone-600 text-[#5c605a]
+  font-headline text-sm font-medium tracking-tight
+  hover:bg-[#e7e9e2] hover:text-[#5c605a]
+  active:scale-[0.98]
+  transition-colors duration-200"
         >
           <Bell className="h-4 w-4" />
-          <span className="text-sm font-medium">알림</span>
 
           {unreadCount > 0 && (
             <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-medium text-white">

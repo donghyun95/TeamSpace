@@ -1,5 +1,5 @@
 import { ClientOnlyEditor } from '@/app/ClientOnlyEditor';
-import { Room } from '../../Room';
+import { Room } from '@/app/Room';
 import { EditorWrapper } from '@/app/EditorwWrapper';
 import { auth } from '@/lib/auth';
 import { redirect, notFound } from 'next/navigation';

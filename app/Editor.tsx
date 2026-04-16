@@ -11,7 +11,6 @@ import { BlockNoteSchema, defaultBlockSpecs } from '@blocknote/core';
 import { TitleInput } from './TitleInput';
 import { useSelectedData } from './Providers/ClientDataProvider';
 import { EditorSkeleton } from './EditorSkeleton';
-EditorSkeleton;
 async function uploadFile(file: File) {
   const body = new FormData();
   body.append('file', file);
@@ -33,6 +32,10 @@ const schema = BlockNoteSchema.create({
     ...remainingBlockSpecs,
   },
 });
+const initialContent = Array.from({ length: 20 }, () => ({
+  type: 'paragraph' as const,
+  content: '',
+}));
 
 export function Editor({ role }) {
   const editor = useCreateBlockNoteWithLiveblocks(
@@ -51,7 +54,7 @@ export function Editor({ role }) {
       <TitleInput editor={editor} />
       <BlockNoteView
         editor={editor}
-        className="editor"
+        className="editor min-h-[72vh]"
         editable={role !== 'VIEWER'}
       />
     </>

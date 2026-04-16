@@ -14,7 +14,7 @@ import TurnstileWidget from './TurnstileWidget';
 import { useState } from 'react';
 import { verifyTurnstile } from '@/lib/api/verigyTurnstileFetch';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
-
+import Link from 'next/link';
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
@@ -101,13 +101,14 @@ export function LoginForm({
         {/* nav */}
         <nav>
           <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-8 md:py-5">
-            <div className="flex items-center gap-2 font-headline text-xl font-extrabold text-[#545f73]">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#4e45e4] text-[10px] text-white">
-                TS
-              </span>
-              TeamSpace
-            </div>
-
+            <Link href="/">
+              <div className="flex items-center gap-2 font-headline text-xl font-extrabold text-[#545f73]">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#4e45e4] text-[10px] text-white">
+                  TS
+                </span>
+                TeamSpace
+              </div>
+            </Link>
             <div className="flex items-center gap-4 md:gap-6">
               <a className="hidden text-xs font-bold text-[#566166] hover:text-[#4e45e4] sm:block">
                 Features

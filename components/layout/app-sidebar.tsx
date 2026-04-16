@@ -36,9 +36,14 @@ import { useSelectedData } from '@/app/Providers/ClientDataProvider';
 import { getAncestorPathFetch } from '@/lib/api/getAncestorPathFetch';
 
 import { set } from 'zod';
-import { SidebarUtilities } from './nav-sidebarUtilities';
+
 import { Separator } from '../ui/separator';
 import { SidebarUserInfo } from './nav-sidebarUserInfo';
+import {
+  SidebarBottomUtiltiy,
+  SidebarTopUtilities,
+} from './nav-sidebarUtilities';
+import TeamSpace from './TeamSpace/TeamSpace';
 
 const isPositiveInt = (n) => Number.isInteger(n) && n > 0;
 
@@ -105,15 +110,16 @@ export function AppSidebar({
 
   return (
     <Sidebar className="border-r-0" {...props}>
-      <SidebarHeader className="px-2 py-2">
+      <SidebarHeader className="w-full px-2 py-2 bg-[#f3f4ee]">
         <SidebarUserInfo name={userName} image={userImage} />
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarUtilities />
-        <Separator className="my-2 bg-stone-200" />
+      <SidebarContent className="bg-[#f3f4ee]">
+        <SidebarTopUtilities />
+        <Separator className="my-0 bg-stone-200" />
         <NavWorkspaces workspaces={user.workspaces} userId={userId} />
         <Separator className="my-1 bg-stone-200" />
         <NavPersonalSpace pages={user.personal.rootPages} />
+        <SidebarBottomUtiltiy />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
