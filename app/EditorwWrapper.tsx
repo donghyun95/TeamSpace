@@ -52,8 +52,8 @@ export function EditorWrapper({ children }) {
       const el = e.currentTarget;
       const r = el.getBoundingClientRect();
 
-      const x = (e.clientX - r.left) / r.width;
-      const y = (e.clientY - r.top) / r.height;
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
       throttledUpdate(x, y);
     },
     [throttledUpdate],
@@ -70,36 +70,36 @@ export function EditorWrapper({ children }) {
   //   return () => clearTimeout(timer);
   // }, [setisCursorOn]);
 
-  const updateRectStyles = useCallback(() => {
-    const el = contentRef.current;
-    const wrapper = containerRef.current;
-    if (!el || !wrapper) return;
+  // const updateRectStyles = useCallback(() => {
+  //   const el = contentRef.current;
+  //   const wrapper = containerRef.current;
+  //   if (!el || !wrapper) return;
 
-    const r = el.getBoundingClientRect();
-    wrapper.style.setProperty('--rect-width', `${r.width}px`);
-    wrapper.style.setProperty('--rect-height', `${r.height}px`);
-    wrapper.style.setProperty('--rect-left', `${r.left}px`);
-    wrapper.style.setProperty('--rect-top', `${r.top}px`);
-  }, []);
+  //   const r = el.getBoundingClientRect();
+  //   wrapper.style.setProperty('--rect-width', `${r.width}px`);
+  //   wrapper.style.setProperty('--rect-height', `${r.height}px`);
+  //   wrapper.style.setProperty('--rect-left', `${r.left}px`);
+  //   wrapper.style.setProperty('--rect-top', `${r.top}px`);
+  // }, []);
 
-  useEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-    updateRectStyles();
-    const observer = new ResizeObserver(() => {
-      updateRectStyles();
-    });
+  // useEffect(() => {
+  //   const el = contentRef.current;
+  //   if (!el) return;
+  //   updateRectStyles();
+  //   const observer = new ResizeObserver(() => {
+  //     updateRectStyles();
+  //   });
 
-    observer.observe(el);
+  //   observer.observe(el);
 
-    window.addEventListener('scroll', updateRectStyles);
-    window.addEventListener('resize', updateRectStyles);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', updateRectStyles);
-      window.removeEventListener('resize', updateRectStyles);
-    };
-  }, [updateRectStyles]);
+  //   window.addEventListener('scroll', updateRectStyles);
+  //   window.addEventListener('resize', updateRectStyles);
+  //   return () => {
+  //     observer.disconnect();
+  //     window.removeEventListener('scroll', updateRectStyles);
+  //     window.removeEventListener('resize', updateRectStyles);
+  //   };
+  // }, [updateRectStyles]);
 
   return (
     <>
@@ -111,12 +111,12 @@ export function EditorWrapper({ children }) {
           ref={contentRef}
           onPointerMove={handlePointerMove}
           onPointerLeave={handlePointerLeave}
-          className="mx-auto w-[900px] min-h-[92vh] bg-white"
+          className="mx-auto w-[900px] min-h-[92vh] bg-white relative"
         >
           <PopOverEmoticon />
           {children}
+          {isCursorOn && <CursorLayer />}
         </motion.div>
-        {isCursorOn && <CursorLayer />}
       </div>
     </>
   );

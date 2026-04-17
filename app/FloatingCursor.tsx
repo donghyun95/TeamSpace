@@ -14,13 +14,14 @@ export default function FloatingCursor({
   return (
     <div
       style={{
-        position: 'fixed',
+        position: 'absolute',
         left: 0,
         top: 0,
         pointerEvents: 'none',
         zIndex: 9999,
         // 기존 계산 로직 그대로 유지
-        transform: `translate3d(calc(var(--rect-left) + ${x} * var(--rect-width)), calc(var(--rect-top) + ${y} * var(--rect-height)), 0)`,
+        transform: `translate3d( ${x}px , ${y}px, 0)`,
+        // transform: `translate3d(calc(${x} * var(--rect-width)), calc(${y} * var(--rect-height)), 0)`,
         willChange: 'transform',
         transition: 'transform 0.025s linear',
         // --- 추가: 커서 오프셋 조정 (시각적 포인트가 좌표와 일치하도록) ---
