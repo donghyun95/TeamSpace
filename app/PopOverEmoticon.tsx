@@ -59,6 +59,7 @@ export function PopOverEmoticon() {
     queryFn: () => getSelfandChildrenFetch(String(pageNodeID)),
     staleTime: 0,
     enabled: true,
+    refetchInterval: 3000,
   });
   const [Emoticon, setEmoticon] = useState(undefined);
   const updateIconMutation = useMutation<
@@ -88,7 +89,7 @@ export function PopOverEmoticon() {
   };
   useEffect(() => {
     setEmoticon(selfAndChildren.self.icon);
-  }, [selfAndChildren]);
+  }, [selfAndChildren.self.icon]);
 
   return (
     <div className="editor mt-20 mb-10 mx-auto">

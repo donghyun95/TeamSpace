@@ -20,6 +20,7 @@ export function TitleInput({ editor }) {
     queryFn: () => getSelfandChildrenFetch(String(pageNodeID)),
     staleTime: 0,
     enabled: true,
+    refetchInterval: 3000,
   });
   const mutation = useMutation({
     mutationFn: ({ pageID, title, icon }: UpdateTitlePayload) =>
@@ -71,10 +72,10 @@ export function TitleInput({ editor }) {
   return (
     <div className="editor mx-auto mb-10">
       {selfAndChildren.role === 'VIEWER' ? (
-        <h1 className="title px-[54px]">{title}</h1>
+        <h1 className="px-[54px]">{title}</h1>
       ) : (
         <input
-          className="title px-[54px]"
+          className="px-[54px]"
           onKeyDown={handleKeyDown}
           onChange={handleChange}
           maxLength={30}

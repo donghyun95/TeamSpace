@@ -54,8 +54,9 @@ export function Editor({ role }) {
       <TitleInput editor={editor} />
       <BlockNoteView
         editor={editor}
-        className="editor min-h-[63vh] mx-auto"
+        className="editor min-h-[63vh] mx-auto max-w-[100%]"
         editable={role !== 'VIEWER'}
+        theme="light"
       />
     </>
   );

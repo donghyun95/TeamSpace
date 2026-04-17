@@ -40,7 +40,7 @@ export default async function RootLayout({
       <SidebarProvider>
         <AppSidebar initialPage={sidebarData as any} />
         <SidebarInset>
-          <header className="sticky top-0 z-50 grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-2 px-3">
+          <header className="sticky top-0 z-50 grid h-14 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3">
             <div className="flex min-w-0 items-center gap-2">
               <SidebarTrigger />
               <Separator
@@ -58,7 +58,7 @@ export default async function RootLayout({
               </Breadcrumb>
             </div>
 
-            <div className="justify-self-center min-w-0 w-[30rem] max-w-full">
+            <div className="justify-self-center min-w-0 max-w-full">
               <SearchBar />
             </div>
 
@@ -74,13 +74,13 @@ export default async function RootLayout({
 }
 function SearchBar() {
   return (
-    <div className="w-full">
-      <div className="relative group">
+    <div className="w-full min-w-0">
+      <div className="relative group min-w-0">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5c605a] transition-colors" />
         <Input
           type="search"
           placeholder="Search"
-          className="h-8 w-full rounded-md border-none bg-[#e0e4dc] pl-10 pr-4 text-sm text-[#30332e] placeholder:text-[#5c605a] shadow-none outline-none transition-all focus-visible:bg-[#ffffff] focus-visible:ring-2 focus-visible:ring-[#4e45e4]/20 focus-visible:ring-offset-0"
+          className="min-w-0 h-8 w-full rounded-md border-none bg-[#e0e4dc] pl-10 pr-4 text-sm text-[#30332e] placeholder:text-[#5c605a] shadow-none outline-none transition-all focus-visible:bg-[#ffffff] focus-visible:ring-2 focus-visible:ring-[#4e45e4]/20 focus-visible:ring-offset-0"
         />
       </div>
     </div>

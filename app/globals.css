@@ -61,14 +61,13 @@ html {
 
 .editor {
   position: relative;
-  max-width: 720px;
+  max-width: 100%;
 }
 
 .bn-editor {
   padding: 10px 52px;
   min-height: 100%;
 }
-
 /* For mobile */
 .floating-threads {
   display: none;
@@ -132,6 +131,15 @@ html {
   .anchored-threads {
     display: none;
   }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 :root {
