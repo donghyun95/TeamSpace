@@ -58,15 +58,23 @@ html {
     background: #0c0c0c;
   }
 } */
-
 .editor {
   position: relative;
-  max-width: 100%;
 }
 
 .bn-editor {
-  padding: 10px 52px;
+  padding: 0px 0px !important;
   min-height: 100%;
+}
+
+.commonPadding {
+  padding: 0 3rem;
+}
+
+@media (min-width: 768px) {
+  .commonPadding {
+    padding: 0 6rem;
+  }
 }
 /* For mobile */
 .floating-threads {

@@ -72,12 +72,12 @@ export function TitleInput({ editor }) {
   return (
     <div className="editor mx-auto mb-10 flex">
       {selfAndChildren.role === 'VIEWER' ? (
-        <h1 className="min-w-0 flex px-[54px] border-0 outline-none text-[40px] font-bold leading-[1.2] font-['Pretendard',sans-serif]">
+        <h1 className="min-w-0 flex commonPadding border-0 outline-none text-[40px] font-bold leading-[1.2] font-['Pretendard',sans-serif]">
           {title}
         </h1>
       ) : (
         <input
-          className="min-w-0 flex px-[54px] border-0 outline-none text-[40px] font-bold leading-[1.2] font-['Pretendard',sans-serif]"
+          className="min-w-0 flex commonPadding border-0 outline-none text-[40px] font-bold leading-[1.2] font-['Pretendard',sans-serif]"
           onKeyDown={handleKeyDown}
           onChange={handleChange}
           maxLength={30}

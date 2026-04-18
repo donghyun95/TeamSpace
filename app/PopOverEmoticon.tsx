@@ -93,7 +93,7 @@ export function PopOverEmoticon() {
 
   return (
     <div className="editor mt-20 mb-10 mx-auto">
-      <div className="px-[54px]">
+      <div className="commonPadding">
         {selfAndChildren.role === 'VIEWER' ? (
           <span className="text-5xl">{Emoticon}</span>
         ) : (

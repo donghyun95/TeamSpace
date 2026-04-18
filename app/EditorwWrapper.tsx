@@ -114,7 +114,7 @@ export function EditorWrapper({ children }) {
           ref={contentRef}
           onPointerMove={handlePointerMove}
           onPointerLeave={handlePointerLeave}
-          className="min-h-[92vh] bg-white relative max-w-[100%] min-w-[360px] md:min-w-[900px] overflow-hidden"
+          className="min-h-[92vh] bg-white relative max-w-[100%] min-w-[360px] md:max-w-[768px] md:min-w-[768px] overflow-hidden"
         >
           <PopOverEmoticon />
           {children}
