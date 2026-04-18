@@ -88,3 +88,12 @@ lib/
 prisma/
   ├─ schema.prisma                    # 데이터 모델
 ```
+
+## 5) 이슈 및 트러블슈팅
+
+<details>
+  <summary>기본으로 열림</summary>
+
+이 내용은 처음부터 펼쳐져 있습니다.
+
+</details>
