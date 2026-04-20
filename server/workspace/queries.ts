@@ -45,6 +45,7 @@ export async function getWorkspaceMembers(workspaceId: number) {
           id: true,
           name: true,
           email: true,
+          image: true,
         },
       },
     },

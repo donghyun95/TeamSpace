@@ -236,6 +236,7 @@ function WorkspaceMembersSection({
               member={member.user}
               index={index}
               role={member.role}
+              onRemoveMember={onRemoveMember}
             />
           ))}
         </div>
