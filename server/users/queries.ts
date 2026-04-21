@@ -101,6 +101,7 @@ export async function getSidebarData(userId: string) {
       where: {
         workspaceId: personalWorkspace.id,
         parentId: null,
+        deletedAt: null,
       },
       orderBy: { order: 'asc' },
     });
@@ -117,6 +118,7 @@ export async function getSidebarData(userId: string) {
         where: {
           workspaceId: workspace.id,
           parentId: null,
+          deletedAt: null,
         },
         orderBy: { order: 'asc' },
       });
@@ -138,6 +140,7 @@ export async function getChildrenPageByParentsId(parentId: number) {
   const ChildrenPage = await prisma.page.findMany({
     where: {
       parentId,
+      deletedAt: null,
     },
   });
   return ChildrenPage;
@@ -145,7 +148,7 @@ export async function getChildrenPageByParentsId(parentId: number) {
 
 export async function getWorkSpacePageByWorkSpaceId(workspaceId: number) {
   const RootPage = await prisma.page.findMany({
-    where: { workspaceId, parentId: null },
+    where: { workspaceId, parentId: null, deletedAt: null },
   });
   console.log('RootPage', RootPage);
   return RootPage;
@@ -216,6 +219,7 @@ export async function getSelfandChildren(userId: string, pageId: number) {
   const children = await prisma.page.findMany({
     where: {
       parentId: pageId,
+      deletedAt: null,
       workspace: {
         members: {
           some: {
