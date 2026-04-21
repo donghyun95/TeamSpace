@@ -10,12 +10,7 @@ import { WorkspaceMembersfetch } from '@/lib/api/getWorkspaceMemeberFetch';
 import { removeWorkspaceMemberFetch } from '@/lib/api/removeWorkspaceMemberFetch';
 import { deleteWorkspaceFetch } from '@/lib/api/deleteWorkspaceFetch';
 import { updateWorkspaceMemberRoleFetch } from '@/lib/api/updateWorkspaceMemberRoleFetch';
-import {
-  getTrashPagesFetch,
-  purgePageFetch,
-  restorePageFetch,
-  trashPageFetch,
-} from '@/lib/api/pageTrashFetch';
+import { restorePageFetch, trashPageFetch } from '@/lib/api/pageTrashFetch';
 
 type InviteRole = 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
 
@@ -254,7 +249,6 @@ function invalidatePageMutationQueries(
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: ['initialPage', variables.userId] }),
     queryClient.invalidateQueries({ queryKey: ['page', variables.pageId] }),
-    queryClient.invalidateQueries({ queryKey: ['trash-pages'] }),
   ]);
 }
 
@@ -274,15 +268,8 @@ function usePageTreeMutation(mode: PageMutationMode) {
         position: 'top-center',
       });
     },
-    onSuccess: async (data, variables) => {
+    onSuccess: async (_data, variables) => {
       await invalidatePageMutationQueries(queryClient, variables);
-
-      if (mode === 'restore' && data?.restoredToRoot) {
-        toast.success('부모가 삭제 상태여서 루트 페이지로 복구했습니다.', {
-          position: 'top-center',
-        });
-        return;
-      }
 
       toast.success(mode === 'trash' ? 'Page moved to trash' : 'Page restored', {
         position: 'top-center',
@@ -297,34 +284,4 @@ export function useTrashPageMutation() {
 
 export function useRestorePageMutation() {
   return usePageTreeMutation('restore');
-}
-
-export function useTrashPagesQuery() {
-  return useQuery({
-    queryKey: ['trash-pages'],
-    queryFn: getTrashPagesFetch,
-    staleTime: 0,
-  });
-}
-
-export function usePurgePageMutation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ pageId }: PageTreeMutationVariables) => purgePageFetch(pageId),
-    onSuccess: async (_data, variables) => {
-      await invalidatePageMutationQueries(queryClient, variables);
-      toast.success('페이지를 영구 삭제했습니다.', {
-        position: 'top-center',
-      });
-    },
-    onError: (error) => {
-      toast.error(
-        error instanceof Error ? error.message : '영구 삭제에 실패했습니다.',
-        {
-          position: 'top-center',
-        },
-      );
-    },
-  });
 }

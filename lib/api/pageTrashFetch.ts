@@ -1,29 +1,9 @@
-type PageTreeMutationAction = 'soft-delete' | 'restore' | 'purge';
+type PageTreeMutationAction = 'soft-delete' | 'restore';
 
 type PageTreeMutationResponse = {
   action: PageTreeMutationAction;
   pageId: number;
   affectedCount: number;
-  restoredToRoot?: boolean;
-};
-
-export type TrashPageItem = {
-  id: number;
-  title: string;
-  icon: string | null;
-  workspaceId: number;
-  parentId: number | null;
-  deletedAt: string;
-  role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
-  parentDeleted: boolean;
-  workspace: {
-    name: string;
-    type: 'PERSONAL' | 'TEAM';
-  };
-};
-
-type TrashPagesResponse = {
-  pages: TrashPageItem[];
 };
 
 async function pageTreeMutationFetch(
@@ -59,26 +39,4 @@ export function trashPageFetch(pageId: number) {
 
 export function restorePageFetch(pageId: number) {
   return pageTreeMutationFetch(pageId, 'restore');
-}
-
-export function purgePageFetch(pageId: number) {
-  return pageTreeMutationFetch(pageId, 'purge');
-}
-
-export async function getTrashPagesFetch() {
-  const response = await fetch('/api/pages/trash');
-
-  const result = (await response.json().catch(() => null)) as
-    | TrashPagesResponse
-    | { error?: string }
-    | null;
-
-  if (!response.ok) {
-    throw new Error(
-      (result && 'error' in result && result.error) ||
-        '휴지통 목록을 가져오지 못했습니다.',
-    );
-  }
-
-  return (result as TrashPagesResponse).pages;
 }

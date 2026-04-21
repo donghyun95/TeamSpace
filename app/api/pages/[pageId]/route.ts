@@ -12,13 +12,6 @@ type RouteContext = {
 
 type PageAction = 'soft-delete' | 'restore' | 'purge';
 
-type PageTreeMutationResponse = {
-  action: PageAction;
-  pageId: number;
-  affectedCount: number;
-  restoredToRoot?: boolean;
-};
-
 async function collectDescendantPageIds(pageId: number) {
   const descendantIds: number[] = [];
   let frontier = [pageId];
@@ -77,8 +70,6 @@ async function handlePageTreeMutation(
     return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 });
   }
 
-  let restoredToRoot = false;
-
   if (action === 'restore' && page.parentId) {
     const parent = await prisma.page.findUnique({
       where: { id: page.parentId },
@@ -86,7 +77,10 @@ async function handlePageTreeMutation(
     });
 
     if (parent?.deletedAt) {
-      restoredToRoot = true;
+      return NextResponse.json(
+        { error: 'PARENT_SOFT_DELETED_RESTORE_BLOCKED' },
+        { status: 409 },
+      );
     }
   }
 
@@ -102,7 +96,7 @@ async function handlePageTreeMutation(
       },
     });
 
-    return NextResponse.json<PageTreeMutationResponse>({
+    return NextResponse.json({
       action,
       pageId: page.id,
       affectedCount: pageIds.length,
@@ -112,34 +106,22 @@ async function handlePageTreeMutation(
   const deletedAt = action === 'soft-delete' ? new Date() : null;
   const deletedBy = action === 'soft-delete' ? requesterId : null;
 
-  const result = await prisma.$transaction(async (tx) => {
-    const updateManyResult = await tx.page.updateMany({
-      where: {
-        id: {
-          in: pageIds,
-        },
+  const result = await prisma.page.updateMany({
+    where: {
+      id: {
+        in: pageIds,
       },
-      data: {
-        deletedAt,
-        deletedBy,
-      },
-    });
-
-    if (action === 'restore' && restoredToRoot) {
-      await tx.page.update({
-        where: { id: page.id },
-        data: { parentId: null },
-      });
-    }
-
-    return updateManyResult;
+    },
+    data: {
+      deletedAt,
+      deletedBy,
+    },
   });
 
-  return NextResponse.json<PageTreeMutationResponse>({
+  return NextResponse.json({
     action,
     pageId: page.id,
     affectedCount: result.count,
-    restoredToRoot,
   });
 }
 
