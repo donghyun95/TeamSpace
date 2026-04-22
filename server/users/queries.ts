@@ -158,7 +158,7 @@ export async function getPagePartRooms(userId: string, pageId: number) {
   return prisma.page.findMany({
     where: {
       id: pageId,
-
+      deletedAt: null,
       workspace: {
         members: {
           some: { userId },
@@ -208,6 +208,7 @@ export async function getSelfandChildren(userId: string, pageId: number) {
   const self = await prisma.page.findFirst({
     where: {
       id: pageId,
+      deletedAt: null,
       workspace: {
         members: {
           some: { userId },
@@ -233,7 +234,7 @@ export async function getSelfandChildren(userId: string, pageId: number) {
     },
   });
   const page = await prisma.page.findFirst({
-    where: { id: pageId },
+    where: { id: pageId, deletedAt: null },
     select: { workspaceId: true },
   });
 

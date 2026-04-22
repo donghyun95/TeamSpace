@@ -64,6 +64,7 @@ export async function createPage(userID: string, parentID: number | null) {
       where: {
         workspaceId: workspace.id,
         parentId: parentID,
+        deletedAt: null,
       },
       orderBy: {
         order: 'desc',
@@ -148,9 +149,17 @@ export async function getPageAncestorPath(
 
 export async function updateTitle(pageId: number, value: string) {
   try {
-    return await prisma.page.update({
-      where: { id: pageId },
+    const updated = await prisma.page.updateMany({
+      where: { id: pageId, deletedAt: null },
       data: { title: value },
+    });
+
+    if (updated.count === 0) {
+      throw new Error('PAGE_NOT_FOUND_OR_DELETED');
+    }
+
+    return prisma.page.findFirst({
+      where: { id: pageId, deletedAt: null },
     });
   } catch (e) {
     console.error(e);
@@ -160,9 +169,17 @@ export async function updateTitle(pageId: number, value: string) {
 
 export async function updateIcon(pageId: number, value: string) {
   try {
-    return await prisma.page.update({
-      where: { id: pageId },
+    const updated = await prisma.page.updateMany({
+      where: { id: pageId, deletedAt: null },
       data: { icon: value },
+    });
+
+    if (updated.count === 0) {
+      throw new Error('PAGE_NOT_FOUND_OR_DELETED');
+    }
+
+    return prisma.page.findFirst({
+      where: { id: pageId, deletedAt: null },
     });
   } catch (e) {
     console.error(e);
@@ -217,6 +234,7 @@ export async function createWorkSpacePage(
       where: {
         workspaceId: workspaceID,
         parentId: parentID,
+        deletedAt: null,
       },
       orderBy: {
         order: 'desc',
