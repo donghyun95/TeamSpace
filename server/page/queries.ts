@@ -138,3 +138,36 @@ export async function softDeletePageWithDescendants(pageId: number, userId: stri
     };
   });
 }
+
+export async function hardDeletePageWithDescendants(pageId: number, userId: string) {
+  return prisma.$transaction(async (tx) => {
+    const page = await tx.page.findFirst({
+      where: {
+        id: pageId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        workspaceId: true,
+      },
+    });
+
+    if (!page) {
+      throw new Error('Page not found');
+    }
+
+    await assertWorkspaceOwner(tx, page.workspaceId, userId);
+
+    const targetIds = await collectDescendantIds(tx, page.workspaceId, page.id);
+    const deleted = await tx.page.deleteMany({
+      where: {
+        id: { in: targetIds },
+      },
+    });
+
+    return {
+      pageId,
+      deletedCount: deleted.count,
+    };
+  });
+}
