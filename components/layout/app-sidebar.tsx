@@ -91,10 +91,7 @@ export function AppSidebar({
 
     if (!searchParamsPageId || !isPositiveInt(num)) return;
 
-    setPageNodeID((prev) => {
-      if (prev === num) return prev;
-      return num;
-    });
+    setPageNodeID(num);
   }, [searchParams]);
   const lastAppliedPageIdRef = useRef<number | null>(null);
   const targetPageId = searchParamsPageId ? Number(searchParamsPageId) : null;
