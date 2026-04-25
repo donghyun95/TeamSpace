@@ -35,12 +35,24 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+
 import { NotificationButton } from './informButton';
 import { PublishButton } from './publish-Button';
+import { useSoftDeletePageWithDescendantsMutation } from './tanstack-query-collection';
+import { on } from 'events';
+import { useSelectedData } from '@/app/Providers/ClientDataProvider';
 
 export function NavActions() {
   const [isOpen, setIsOpen] = React.useState(false);
-
+  const pageNodeID = useSelectedData((state) => state.pageNodeID);
+  const {
+    mutate: moveTrash,
+    isPending,
+    isError,
+  } = useSoftDeletePageWithDescendantsMutation();
+  const onMoveToTrash = () => {
+    moveTrash({ pageId: pageNodeID });
+  };
   return (
     <div className="flex min-w-0 items-center justify-end gap-1 sm:gap-2 text-sm">
       <div className="flex-shrink-0">
@@ -79,7 +91,7 @@ export function NavActions() {
                 <SidebarGroupContent className="gap-0">
                   <SidebarMenu>
                     <SidebarMenuItem>
-                      <SidebarMenuButton>
+                      <SidebarMenuButton onClick={onMoveToTrash}>
                         <Trash2 /> <span>Move to Trash</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
