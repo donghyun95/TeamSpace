@@ -11,6 +11,7 @@ import { removeWorkspaceMemberFetch } from '@/lib/api/removeWorkspaceMemberFetch
 import { deleteWorkspaceFetch } from '@/lib/api/deleteWorkspaceFetch';
 import { updateWorkspaceMemberRoleFetch } from '@/lib/api/updateWorkspaceMemberRoleFetch';
 import { getPersonalDeletedPagesFetch } from '@/lib/api/getPersonalDeletedPagesFetch';
+import { softDeletePageWithDescendantsFetch } from '@/lib/api/softDeletePageWithDescendantsFetch';
 
 type InviteRole = 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER';
 
@@ -240,3 +241,39 @@ export function usePersonalDeletedPages() {
     queryFn: getPersonalDeletedPagesFetch,
   });
 }
+
+type SoftDeletePageVariables = {
+  pageId: number;
+};
+
+export function useSoftDeletePageWithDescendantsMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ pageId }: SoftDeletePageVariables) =>
+      softDeletePageWithDescendantsFetch(pageId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['initialPage'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['personalDeletedPages'],
+      });
+
+      toast.success('Page deleted', {
+        position: 'top-center',
+      });
+    },
+    onError: (error) => {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : '페이지 삭제에 실패했습니다.';
+
+      toast.error(errorMessage, {
+        position: 'top-center',
+      });
+    },
+  });
+}
+
