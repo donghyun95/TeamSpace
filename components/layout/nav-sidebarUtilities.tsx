@@ -2,21 +2,121 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
-  DialogTrigger,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
+  DialogTitle,
   DialogFooter,
+  DialogHeader,
+  DialogTrigger,
 } from '@/components/ui/dialog';
+import { ReactNode } from 'react';
 import {
-  Plus,
+  CircleQuestionMark,
   FileText,
+  Inbox,
+  Plus,
   Star,
   Trash2,
-  Inbox,
-  CircleQuestionMark,
 } from 'lucide-react';
+
+type DeletedPage = {
+  id: string;
+  title: string;
+  icon?: ReactNode;
+};
+
+const deletedPages: DeletedPage[] = [
+  { id: 'page-1', title: '프로젝트 회고 2026 Q1', icon: <FileText className="h-4 w-4" /> },
+  { id: 'page-2', title: '마케팅 주간 보고서', icon: <Plus className="h-4 w-4" /> },
+  {
+    id: 'page-3',
+    title:
+      '팀 온보딩 가이드 - 매우 긴 문서 제목이 들어왔을 때 말줄임이 적용되는지 확인합니다',
+    icon: <FileText className="h-4 w-4" />,
+  },
+];
+
+type DeletedPageRowProps = {
+  page: DeletedPage;
+  onRestorePage?: (id: string) => void;
+  onDeletePage?: (id: string) => void;
+};
+
+function DeletedPageRow({
+  page,
+  onRestorePage,
+  onDeletePage,
+}: DeletedPageRowProps) {
+  return (
+    <div className="flex h-12 w-full items-center justify-between rounded-lg border border-[#d9ddd3] px-3 transition-colors duration-200 hover:bg-[#f4f5f1]">
+      <div className="mr-3 flex min-w-0 items-center gap-2 text-[#5c605a]">
+        <span className="shrink-0">{page.icon ?? <FileText className="h-4 w-4" />}</span>
+        <span className="truncate text-sm font-medium" title={page.title}>
+          {page.title}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 text-[#5c605a] transition-colors duration-200 hover:bg-[#e7e9e2]"
+          aria-label={`복원: ${page.title}`}
+          onClick={() => onRestorePage?.(page.id)}
+        >
+          복원
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 text-red-600 transition-colors duration-200 hover:bg-red-50 hover:text-red-700"
+          aria-label={`영구 삭제: ${page.title}`}
+          onClick={() => onDeletePage?.(page.id)}
+        >
+          삭제
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+type DeletedPageListProps = {
+  pages: DeletedPage[];
+  onRestorePage?: (id: string) => void;
+  onDeletePage?: (id: string) => void;
+};
+
+function DeletedPageList({
+  pages,
+  onRestorePage,
+  onDeletePage,
+}: DeletedPageListProps) {
+  if (pages.length === 0) {
+    return (
+      <div className="flex min-h-[180px] flex-col items-center justify-center text-center text-[#5c605a]">
+        <p className="font-headline text-sm font-semibold">
+          휴지통이 비어 있습니다.
+        </p>
+        <p className="mt-1 text-xs text-[#7b8078]">
+          삭제된 페이지가 생기면 이곳에서 복원하거나 영구 삭제할 수 있어요.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {pages.map((page) => (
+        <DeletedPageRow
+          key={page.id}
+          page={page}
+          onRestorePage={onRestorePage}
+          onDeletePage={onDeletePage}
+        />
+      ))}
+    </div>
+  );
+}
 const utilityItemClass = `
   w-full justify-start gap-3
   px-3 py-2 h-auto
@@ -46,11 +146,15 @@ export function SidebarTopUtilities() {
 type SidebarBottomUtilityProps = {
   onOpenTrashPage?: () => void;
   onEmptyTrash?: () => void;
+  onRestorePage?: (id: string) => void;
+  onDeletePage?: (id: string) => void;
 };
 
 export function SidebarBottomUtiltiy({
   onOpenTrashPage,
   onEmptyTrash,
+  onRestorePage,
+  onDeletePage,
 }: SidebarBottomUtilityProps) {
   return (
     <div className="space-y-1 py-2 px-2">
@@ -67,13 +171,20 @@ export function SidebarBottomUtiltiy({
           </Button>
         </DialogTrigger>
         <DialogContent className="min-w-[40vw] min-h-[40vh] overflow-hidden border border-zinc-200 bg-white p-0 text-black shadow-2xl sm:max-w-[460px] dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100">
-          <DialogHeader>
+          <DialogHeader className="px-4 pt-4">
             <DialogTitle>Trash</DialogTitle>
             <DialogDescription>
               삭제된 페이지를 확인하거나 복구할 수 있습니다.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <div className="mt-3 max-h-[300px] space-y-2 overflow-y-auto px-4 pb-2">
+            <DeletedPageList
+              pages={deletedPages}
+              onRestorePage={onRestorePage}
+              onDeletePage={onDeletePage}
+            />
+          </div>
+          <DialogFooter className="px-4 pb-4">
             <DialogClose asChild>
               <Button variant="outline">취소</Button>
             </DialogClose>
