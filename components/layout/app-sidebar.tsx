@@ -44,6 +44,7 @@ import {
   SidebarTopUtilities,
 } from './nav-sidebarUtilities';
 import TeamSpace from './TeamSpace/TeamSpace';
+import { usePersonalDeletedPages } from './tanstack-query-collection';
 
 const isPositiveInt = (n) => Number.isInteger(n) && n > 0;
 
@@ -55,13 +56,9 @@ export function AppSidebar({
   const searchParams = useSearchParams();
   const searchParamsPageId = searchParams.get('PageId');
   const setPageNodeID = useSelectedData((state) => state.setPageNodeID);
-  const hasAppliedAncestorPathRef = useRef(false);
   const pageNodeID = useSelectedData((state) => state.pageNodeID);
   const setNodeopenBatch = useSelectedData((state) => state.setNodesOpenBatch);
   const setNodeOpen = useSelectedData((state) => state.setNodeOpen);
-  const setWorkspaceOpen = useSelectedData((state) => state.setWorkspaceOpen);
-  const queryClient = useQueryClient();
-
   if (!searchParamsPageId) {
   }
   const userId = session?.user.id;
@@ -73,6 +70,8 @@ export function AppSidebar({
     initialData: initialPage,
     staleTime: 1000 * 30,
   });
+  const { data: deletePage } = usePersonalDeletedPages();
+  console.log(deletePage, 'deleted pages in sidebar');
   const { data: ancestorPath } = useQuery({
     queryKey: [
       'ancestorPath',
