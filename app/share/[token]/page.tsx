@@ -1,7 +1,7 @@
 import { findPageByPublicToken } from '@/server/page/queries';
 import Room from './readonlyRoom';
 import { notFound } from 'next/navigation';
-import AccessDeniedPage from './accesDenied';
+import AccessDeniedPage from '../../accesDenied';
 
 export default async function Page({
   params,

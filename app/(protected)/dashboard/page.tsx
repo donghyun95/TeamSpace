@@ -1,5 +1,7 @@
 import { auth } from '@/lib/auth';
+import { getUserPersonalRootPages } from '@/server/users/queries';
 import { redirect } from 'next/navigation';
+
 export default async function Page() {
   const session = await auth();
 
@@ -8,5 +10,9 @@ export default async function Page() {
   }
 
   const user = session.user;
-  redirect(`/dashboard/${user.id}`);
+  if (!user.id) {
+    redirect('/login');
+  }
+  const rootPages = await getUserPersonalRootPages(user.id);
+  redirect(`/dashboard/${user.id}/?PageId=${rootPages[0]?.id}`);
 }

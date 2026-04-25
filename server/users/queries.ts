@@ -392,3 +392,37 @@ export async function assertPagePublished(pageId: number) {
 
   return page;
 }
+export async function getUserPersonalRootPages(userId: string) {
+  const personalWorkspace = await prisma.workspaceMember.findFirst({
+    where: {
+      userId,
+      workspace: {
+        type: 'PERSONAL',
+      },
+    },
+    select: {
+      workspace: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!personalWorkspace) {
+    return [];
+  }
+
+  const rootPages = await prisma.page.findMany({
+    where: {
+      workspaceId: personalWorkspace.workspace.id,
+      parentId: null,
+      deletedAt: null,
+    },
+    orderBy: {
+      order: 'asc',
+    },
+  });
+
+  return rootPages;
+}

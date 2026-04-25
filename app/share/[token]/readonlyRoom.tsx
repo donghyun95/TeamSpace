@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { pagePublicInfoFetch } from '@/lib/api/getPublishedFetch';
 import { notFound } from 'next/navigation';
 import { useEffect } from 'react';
-import AccessDeniedPage from './accesDenied';
+import AccessDeniedPage from '../../accesDenied';
 
 export default function Room({ pageid }: { pageid: number }) {
   const { data: publicData } = useQuery({

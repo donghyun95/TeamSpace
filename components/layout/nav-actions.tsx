@@ -18,7 +18,7 @@ import {
   Trash,
   Trash2,
 } from 'lucide-react';
-
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -45,6 +45,8 @@ import { useSelectedData } from '@/app/Providers/ClientDataProvider';
 export function NavActions() {
   const [isOpen, setIsOpen] = React.useState(false);
   const pageNodeID = useSelectedData((state) => state.pageNodeID);
+  const router = useRouter();
+
   const {
     mutate: moveTrash,
     isPending,
@@ -52,6 +54,8 @@ export function NavActions() {
   } = useSoftDeletePageWithDescendantsMutation();
   const onMoveToTrash = () => {
     moveTrash({ pageId: pageNodeID });
+    router.push('/dashboard');
+    router.refresh();
   };
   return (
     <div className="flex min-w-0 items-center justify-end gap-1 sm:gap-2 text-sm">
