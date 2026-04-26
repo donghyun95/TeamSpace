@@ -4,7 +4,11 @@ import { LiveblocksProviders } from '../Providers/liveblocksProvider';
 import { SelectedDataProvider } from '../Providers/ClientDataProvider';
 import { getSidebarData } from '@/server/users/queries';
 import { redirect } from 'next/navigation';
-export default async function RootLayout({ children }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const session = await auth();
   if (!session || !session.user?.id) {
     return redirect('/login');

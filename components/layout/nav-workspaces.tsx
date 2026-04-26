@@ -137,7 +137,7 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
     },
 
     onSettled: async (_data, _err, variables) => {
-      const { workspaceId, parentId } = variables;
+      const { workspaceID, parentId } = variables;
       if (parentId === null) {
         await queryClient.invalidateQueries({
           queryKey: ['initialPage', session?.user.id],
@@ -162,9 +162,9 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
   };
   const indent = depth * INDENT_SIZE;
   const childIndent = (depth + 1) * INDENT_SIZE + TOGGLE_WIDTH;
-  const handleClickCursorOnOff = (ev) => {
+  const handleClickCursorOnOff = (event: React.MouseEvent<HTMLDivElement>) => {
     if (isCursorOn) {
-      ev.stopPropagation();
+      event.stopPropagation();
       setisCursorOn(false);
     }
   };
@@ -239,7 +239,7 @@ data-[active=true]:bg-[#e0e4dc]
         <CollapsibleContent className="w-full">
           {selfAndChildren?.children?.length > 0 && (
             <ul className="w-full min-w-0">
-              {selfAndChildren.children.map((child) => (
+              {selfAndChildren.children.map((child: Page) => (
                 <PageTreeNode key={child.id} page={child} depth={depth + 1} />
               ))}
             </ul>
@@ -360,10 +360,10 @@ function WorkSpaceFolder({
       isNeedChange: true,
     });
   };
-  const openChange = (nextBoolean) => {
+  const openChange = (nextBoolean: boolean) => {
     setModalOpen(nextBoolean);
   };
-  const handleOpenChange = (ev) => {
+  const handleOpenChange = () => {
     setModalOpen(!modalOpen);
   };
   const handleOpenFolder = (nextOpen: boolean) => {

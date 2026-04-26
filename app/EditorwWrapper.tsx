@@ -47,11 +47,10 @@ function CursorLayer() {
     </>
   );
 }
-export function EditorWrapper({ children }) {
+export function EditorWrapper({ children }: { children: React.ReactNode }) {
   const isCursorOn = useSelectedData((state) => state.isCursorOn);
   const [layoutReady, setLayoutReady] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
-  const setisCursorOn = useSelectedData((state) => state.setisCursorOn);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();

@@ -5,7 +5,7 @@ export type SelectedDataState = {
   pageNodeID: number;
   isCursorOn: boolean;
   ancestorPath: number[];
-  openMap: Record<number, boolean>;
+  openMap: Record<string, boolean>;
 };
 
 export type SelectedDataActions = {

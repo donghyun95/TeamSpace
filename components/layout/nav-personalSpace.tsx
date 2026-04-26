@@ -61,6 +61,7 @@ type PageTreeNodeProps = {
   page: Page;
   depth: number;
 };
+
 const INDENT_SIZE = 12;
 const TOGGLE_WIDTH = 20;
 
@@ -79,6 +80,7 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
     staleTime: 1000 * 30,
     enabled: true,
   });
+  console.log(selfAndChildren);
   const queryClient = useQueryClient();
   const createChildMutation = useMutation({
     mutationFn: createPage,
@@ -128,7 +130,7 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
   };
   const indent = depth * INDENT_SIZE;
   const childIndent = (depth + 1) * INDENT_SIZE + TOGGLE_WIDTH;
-  const handleClickCursorOnOff = (ev) => {
+  const handleClickCursorOnOff = () => {
     if (isCursorOn) setisCursorOn(false);
   };
   function handleOpenChange(nextOpen: boolean) {
@@ -206,7 +208,7 @@ function PageTreeNode({ page, depth }: PageTreeNodeProps) {
         <CollapsibleContent className="w-full">
           {selfAndChildren?.children?.length > 0 && (
             <ul className="w-full min-w-0">
-              {selfAndChildren.children.map((child) => (
+              {selfAndChildren.children.map((child: Page) => (
                 <PageTreeNode key={child.id} page={child} depth={depth + 1} />
               ))}
             </ul>

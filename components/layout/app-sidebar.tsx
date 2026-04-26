@@ -54,7 +54,7 @@ type DeletePageParams = {
   type?: 'personal';
 };
 
-const isPositiveInt = (n) => Number.isInteger(n) && n > 0;
+const isPositiveInt = (n: number) => Number.isInteger(n) && n > 0;
 
 export function AppSidebar({
   initialPage,
@@ -93,11 +93,11 @@ export function AppSidebar({
   const { data: ancestorPath } = useQuery({
     queryKey: [
       'ancestorPath',
-      searchParamsPageId ? searchParamsPageId : pageNodeID,
+      searchParamsPageId ? searchParamsPageId : String(pageNodeID),
     ],
     queryFn: () =>
       getAncestorPathFetch(
-        searchParamsPageId ? searchParamsPageId : pageNodeID,
+        searchParamsPageId ? searchParamsPageId : String(pageNodeID),
       ),
     staleTime: 0,
   });
