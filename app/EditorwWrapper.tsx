@@ -12,6 +12,8 @@ import { useSelectedData } from './Providers/ClientDataProvider';
 import throttle from 'lodash/throttle';
 import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
+import FloatingFeedback from './Feedback';
+
 function CursorLayer() {
   const others = useOthersMapped(
     (other) => ({
@@ -130,6 +132,7 @@ export function EditorWrapper({ children }) {
           <PopOverEmoticon />
           {children}
           {isDesktop && layoutReady && isCursorOn && <CursorLayer />}
+          <FloatingFeedback />
         </motion.div>
       </div>
     </>
