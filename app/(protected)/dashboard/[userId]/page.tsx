@@ -5,6 +5,8 @@ import { auth } from '@/lib/auth';
 import { redirect, notFound } from 'next/navigation';
 import { getPagePublicInfo } from '@/server/page/queries';
 import AccessDeniedPage from '@/app/accesDenied';
+import SideAndHaeder from './sideaANDheader';
+
 export default async function Page({
   params,
   searchParams,
@@ -31,9 +33,11 @@ export default async function Page({
 
   return (
     <Room PageId={PageId}>
-      <EditorWrapper>
-        <ClientOnlyEditor />
-      </EditorWrapper>
+      <SideAndHaeder>
+        <EditorWrapper>
+          <ClientOnlyEditor />
+        </EditorWrapper>
+      </SideAndHaeder>
     </Room>
   );
 }

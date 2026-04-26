@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { SelectedDataProvider } from '@/app/Providers/ClientDataProvider';
 
-export default async function RootLayout({
+export default async function SideAndHaeder({
   children,
 }: {
   children: React.ReactNode;

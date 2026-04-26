@@ -95,6 +95,7 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
   const isActive = Number(page.id) === Number(pageNodeID);
   const icon = selfAndChildren?.self?.icon ?? page.icon ?? '📄';
   const queryClient = useQueryClient();
+  const broadcast = useBroadcastEvent();
   const createChildMutation = useMutation({
     mutationFn: createWorkSpacePageFetch,
 
@@ -153,6 +154,10 @@ export function PageTreeNode({ page, depth }: PageTreeNodeProps) {
     createChildMutation.mutate({
       workspaceID: page.workspaceId,
       parentId: page.id,
+    });
+    broadcast({
+      type: 'CHANGEWORKSPACEDATA',
+      isNeedChange: true,
     });
   };
   const indent = depth * INDENT_SIZE;
@@ -254,7 +259,7 @@ export function NavWorkspaces({ workspaces, userId }: NavWorkspacesProps) {
       queryClient.invalidateQueries({ queryKey: ['initialPage', userId] });
     },
   });
-  const broadcast = useBroadcastEvent();
+
   useEventListener(({ event }) => {
     if (event.type === 'CHANGEWORKSPACEDATA') {
       toast(
@@ -285,10 +290,6 @@ export function NavWorkspaces({ workspaces, userId }: NavWorkspacesProps) {
           <button
             onClick={() => {
               WorkspaceAddMutation.mutate();
-              broadcast({
-                type: 'CHANGEWORKSPACEDATA',
-                isNeedChange: true,
-              });
             }}
             type="button"
             className="ml-auto flex h-8 w-8 cursor-pointer items-center justify-center rounded-md"
@@ -329,7 +330,7 @@ function WorkSpaceFolder({
   const setNodeOpen = useSelectedData((state) => state.setNodeOpen);
   const userId = session?.user?.id ?? '';
   const { data: role, isLoading, error } = useWorkspaceMemberRole(id, userId);
-
+  const broadcast = useBroadcastEvent();
   const createChildMutation = useMutation({
     mutationFn: createWorkSpacePageFetch,
 
@@ -348,6 +349,10 @@ function WorkSpaceFolder({
     createChildMutation.mutate({
       workspaceID: id, // 또는 따로 workspaceId prop으로 받는 게 더 깔끔
       parentId: null,
+    });
+    broadcast({
+      type: 'CHANGEWORKSPACEDATA',
+      isNeedChange: true,
     });
   };
   const openChange = (nextBoolean) => {
