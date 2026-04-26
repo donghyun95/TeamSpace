@@ -1,4 +1,7 @@
 // Define Liveblocks types for your application
+
+import { emoji } from 'zod';
+
 // https://liveblocks.io/docs/api-reference/liveblocks-react#Typing-your-data
 declare global {
   interface Liveblocks {
@@ -24,7 +27,10 @@ declare global {
     };
 
     // Custom events, for useBroadcastEvent, useEventListener
-    RoomEvent: {};
+    RoomEvent: {
+      type: 'CHANGEWORKSPACEDATA';
+      isNeedChange: boolean;
+    };
     // Example has two events, using a union
     // | { type: "PLAY" }
     // | { type: "REACTION"; emoji: "🔥" };

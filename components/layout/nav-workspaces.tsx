@@ -31,6 +31,11 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { WorkspaceSettingsDialog } from './workspaceModal';
 import { createWorkSpaceFetch } from '@/lib/api/createWorkSpaceFetch';
 import { useWorkspaceMemberRole } from './tanstack-query-collection';
+import {
+  useBroadcastEvent,
+  useEventListener,
+} from '@liveblocks/react/suspense';
+import { toast } from 'sonner';
 
 type Page = {
   id: string | number;
@@ -249,6 +254,19 @@ export function NavWorkspaces({ workspaces, userId }: NavWorkspacesProps) {
       queryClient.invalidateQueries({ queryKey: ['initialPage', userId] });
     },
   });
+  const broadcast = useBroadcastEvent();
+  useEventListener(({ event }) => {
+    if (event.type === 'CHANGEWORKSPACEDATA') {
+      toast(
+        event.isNeedChange
+          ? '워크스페이스 데이터가 변경되었습니다. 새로고침 해주세요.'
+          : '워크스페이스 데이터가 변경되었습니다.',
+        {
+          position: 'top-center',
+        },
+      );
+    }
+  });
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <Collapsible defaultOpen className="group/workspace w-full">
@@ -265,7 +283,13 @@ export function NavWorkspaces({ workspaces, userId }: NavWorkspacesProps) {
           </CollapsibleTrigger>
 
           <button
-            onClick={() => WorkspaceAddMutation.mutate()}
+            onClick={() => {
+              WorkspaceAddMutation.mutate();
+              broadcast({
+                type: 'CHANGEWORKSPACEDATA',
+                isNeedChange: true,
+              });
+            }}
             type="button"
             className="ml-auto flex h-8 w-8 cursor-pointer items-center justify-center rounded-md"
           >
