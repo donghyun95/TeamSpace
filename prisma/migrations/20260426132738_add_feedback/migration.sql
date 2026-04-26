@@ -11,7 +11,6 @@ CREATE TABLE "Feedback" (
     "mood" INTEGER NOT NULL,
     "pageUrl" TEXT,
     "userAgent" TEXT,
-    "userId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -23,9 +22,3 @@ CREATE INDEX "Feedback_createdAt_idx" ON "Feedback"("createdAt");
 
 -- CreateIndex
 CREATE INDEX "Feedback_category_createdAt_idx" ON "Feedback"("category", "createdAt");
-
--- CreateIndex
-CREATE INDEX "Feedback_userId_idx" ON "Feedback"("userId");
-
--- AddForeignKey
-ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
