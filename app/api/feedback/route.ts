@@ -1,56 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FeedbackCategory } from '@prisma/client';
 
 import { auth } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
-import { feedbackSchema, mapFeedbackCategory } from '@/server/feedback/schema';
+import { getFeedbackList } from '@/server/feedback/queries';
 
-function errorResponse(error: string, status: number, details?: unknown) {
-  return NextResponse.json(
-    details ? { error, details } : { error },
-    { status },
-  );
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 100;
+
+function isAdminEmail(email?: string | null) {
+  if (!email) return false;
+
+  const adminEmailList = (process.env.ADMIN_EMAILS ?? '')
+    .split(',')
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+
+  return adminEmailList.includes(email.toLowerCase());
 }
 
-export async function POST(request: NextRequest) {
+function parseCategory(rawValue: string | null): FeedbackCategory | undefined {
+  if (!rawValue) return undefined;
+
+  const normalized = rawValue.trim().toUpperCase();
+
+  if (
+    normalized !== FeedbackCategory.BUG &&
+    normalized !== FeedbackCategory.IDEA &&
+    normalized !== FeedbackCategory.UX
+  ) {
+    return undefined;
+  }
+
+  return normalized as FeedbackCategory;
+}
+
+export async function GET(request: NextRequest) {
   try {
     const session = await auth();
 
-    // TODO: Add lightweight rate-limiting hook here (IP/user-based) if needed.
-
-    const rawBody: unknown = await request.json();
-    const parsedBody = feedbackSchema.safeParse(rawBody);
-
-    if (!parsedBody.success) {
-      return errorResponse(
-        'INVALID_INPUT',
-        400,
-        parsedBody.error.flatten(),
-      );
+    if (!session?.user?.email || !isAdminEmail(session.user.email)) {
+      return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 });
     }
 
-    const { category, title, message, email, mood, pageUrl, userAgent } =
-      parsedBody.data;
+    const searchParams = request.nextUrl.searchParams;
+    const page = Math.max(
+      Number(searchParams.get('page')) || DEFAULT_PAGE,
+      DEFAULT_PAGE,
+    );
+    const pageSize = Math.min(
+      Math.max(
+        Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE,
+        DEFAULT_PAGE,
+      ),
+      MAX_PAGE_SIZE,
+    );
 
-    const created = await prisma.feedback.create({
-      data: {
-        category: mapFeedbackCategory(category),
-        title: title.trim(),
-        message: message.trim(),
-        email: email?.trim() || null,
-        mood,
-        pageUrl: pageUrl?.trim() || null,
-        userAgent: userAgent?.trim() || null,
-        userId: session?.user?.id ?? null,
-      },
-      select: {
-        id: true,
-      },
+    const category = parseCategory(searchParams.get('category'));
+
+    const result = await getFeedbackList({
+      page,
+      pageSize,
+      category,
     });
 
-    return NextResponse.json({ ok: true, id: created.id }, { status: 201 });
+    return NextResponse.json(result);
   } catch (error) {
     console.error(error);
 
-    return errorResponse('INTERNAL_SERVER_ERROR', 500);
+    return NextResponse.json(
+      { error: 'INTERNAL_SERVER_ERROR' },
+      { status: 500 },
+    );
   }
 }
