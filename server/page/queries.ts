@@ -163,7 +163,8 @@ export async function hardDeletePageWithDescendants(
     }
 
     await assertWorkspaceOwner(tx, page.workspaceId, userId);
-
+    // hard delete는 soft-deleted page를 대상으로 하지 않는다.
+    // 따라서 살아있는 descendant만 수집한다.
     const targetIds = await collectDescendantIds(tx, page.workspaceId, page.id);
     const deleted = await tx.page.deleteMany({
       where: {
@@ -206,5 +207,74 @@ export async function hardDeleteSinglePage(pageId: number, userId: string) {
       pageId,
       deleted: true,
     };
+  });
+}
+
+export async function restorePageToRoot(pageId: number, userId: string) {
+  return prisma.$transaction(async (tx) => {
+    // 삭제된 페이지 + 워크스페이스 확인
+    const page = await tx.page.findFirst({
+      where: {
+        id: pageId,
+        deletedAt: { not: null },
+      },
+      select: {
+        id: true,
+        workspaceId: true,
+      },
+    });
+
+    if (!page) {
+      throw new Error('Page not found or not deleted');
+    }
+
+    // 권한 확인 (기존 delete 정책과 동일하게 OWNER만 허용)
+    const membership = await tx.workspaceMember.findUnique({
+      where: {
+        userId_workspaceId: {
+          userId,
+          workspaceId: page.workspaceId,
+        },
+      },
+      select: { role: true },
+    });
+
+    if (!membership) throw new Error('Not a workspace member');
+    if (membership.role !== WorkspaceRole.OWNER) {
+      throw new Error('Only OWNER can restore page');
+    }
+
+    // 루트(parentId: null) 마지막 순서 계산
+    const lastRoot = await tx.page.findFirst({
+      where: {
+        workspaceId: page.workspaceId,
+        parentId: null,
+        deletedAt: null,
+      },
+      orderBy: { order: 'desc' },
+      select: { order: true },
+    });
+
+    const nextOrder = (lastRoot?.order ?? -1) + 1;
+
+    // 복구 + 최상위로 이동
+    const restored = await tx.page.update({
+      where: { id: page.id },
+      data: {
+        deletedAt: null,
+        deletedBy: null,
+        parentId: null, // ✅ 핵심: 부모 제거 -> 루트로 이동
+        order: nextOrder,
+      },
+      select: {
+        id: true,
+        workspaceId: true,
+        parentId: true,
+        deletedAt: true,
+        order: true,
+      },
+    });
+
+    return restored;
   });
 }
