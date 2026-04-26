@@ -260,18 +260,18 @@ export function NavWorkspaces({ workspaces, userId }: NavWorkspacesProps) {
     },
   });
 
-  useEventListener(({ event }) => {
-    if (event.type === 'CHANGEWORKSPACEDATA') {
-      toast(
-        event.isNeedChange
-          ? '워크스페이스 데이터가 변경되었습니다. 새로고침 해주세요.'
-          : '워크스페이스 데이터가 변경되었습니다.',
-        {
-          position: 'top-center',
-        },
-      );
-    }
-  });
+  // useEventListener(({ event }) => {
+  //   if (event.type === 'CHANGEWORKSPACEDATA') {
+  //     toast(
+  //       event.isNeedChange
+  //         ? '워크스페이스 데이터가 변경되었습니다. 새로고침 해주세요.'
+  //         : '워크스페이스 데이터가 변경되었습니다.',
+  //       {
+  //         position: 'top-center',
+  //       },
+  //     );
+  //   }
+  // });
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <Collapsible defaultOpen className="group/workspace w-full">

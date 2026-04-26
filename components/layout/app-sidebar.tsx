@@ -77,7 +77,8 @@ export function AppSidebar({
     queryKey: ['initialPage', userId],
     queryFn: getSidebarData,
     initialData: initialPage,
-    staleTime: 1000 * 10,
+    staleTime: 0,
+    refetchInterval: 1000 * 2,
   });
   const { data: deletePage } = usePersonalDeletedPages();
   const hardDeletePageMutation = useHardDeletePageMutation();
