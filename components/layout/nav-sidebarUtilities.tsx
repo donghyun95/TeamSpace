@@ -157,25 +157,6 @@ export function SidebarTopUtilities({ userEmail }: SidebarTopUtilitiesProps) {
         <Inbox className="w-5 h-5" />
         <span className="text-sm">Inbox</span>
       </Button>
-
-      {isAdmin ? (
-        <Button
-          asChild
-          variant="ghost"
-          className={`${utilityItemClass} ${
-            isFeedbackPage ? 'bg-[#e7e9e2] text-[#37352f]' : ''
-          }`}
-        >
-          <Link
-            href="/feedback"
-            aria-label="Feedback 페이지로 이동"
-            aria-current={isFeedbackPage ? 'page' : undefined}
-          >
-            <MessageCircleQuestion className="w-5 h-5" />
-            <span className="text-sm">Feedback</span>
-          </Link>
-        </Button>
-      ) : null}
     </div>
   );
 }
