@@ -1,6 +1,4 @@
 'use client';
-
-import { FeedbackCategory } from '@prisma/client';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
@@ -8,13 +6,15 @@ import {
   type GetFeedbackListResponse,
 } from '@/lib/api/getFeedbackListFetch';
 
-const categoryOptions: { label: string; value: 'ALL' | FeedbackCategory }[] = [
-  { label: 'ALL', value: 'ALL' },
-  { label: 'BUG', value: FeedbackCategory.BUG },
-  { label: 'IDEA', value: FeedbackCategory.IDEA },
-  { label: 'UX', value: FeedbackCategory.UX },
-];
+type FeedbackCategoryValue = 'BUG' | 'IDEA' | 'UX';
+type CategoryFilter = 'ALL' | FeedbackCategoryValue;
 
+const categoryOptions: { label: string; value: CategoryFilter }[] = [
+  { label: 'ALL', value: 'ALL' },
+  { label: 'BUG', value: 'BUG' },
+  { label: 'IDEA', value: 'IDEA' },
+  { label: 'UX', value: 'UX' },
+];
 const pageSizeOptions = [20, 50, 100] as const;
 
 function formatCreatedAt(value: string) {
@@ -36,7 +36,8 @@ function formatCreatedAt(value: string) {
 
 export default function FeedbackList() {
   const [category, setCategory] = useState<'ALL' | FeedbackCategory>('ALL');
-  const [pageSize, setPageSize] = useState<(typeof pageSizeOptions)[number]>(20);
+  const [pageSize, setPageSize] =
+    useState<(typeof pageSizeOptions)[number]>(20);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +66,10 @@ export default function FeedbackList() {
 
         setResult(response);
       } catch (fetchError) {
-        if (fetchError instanceof DOMException && fetchError.name === 'AbortError') {
+        if (
+          fetchError instanceof DOMException &&
+          fetchError.name === 'AbortError'
+        ) {
           return;
         }
 
@@ -135,7 +139,11 @@ export default function FeedbackList() {
             <select
               value={pageSize}
               onChange={(event) => {
-                setPageSize(Number(event.target.value) as (typeof pageSizeOptions)[number]);
+                setPageSize(
+                  Number(
+                    event.target.value,
+                  ) as (typeof pageSizeOptions)[number],
+                );
                 setPage(1);
               }}
               className="h-10 rounded-md border border-black/20 px-3 text-sm"
@@ -186,7 +194,10 @@ export default function FeedbackList() {
                   const expanded = expandedMessageIds.has(item.id);
 
                   return (
-                    <tr key={item.id} className="border-t border-black/10 align-top">
+                    <tr
+                      key={item.id}
+                      className="border-t border-black/10 align-top"
+                    >
                       <td className="px-3 py-2">{item.category}</td>
                       <td className="px-3 py-2">{item.title}</td>
                       <td className="px-3 py-2">
