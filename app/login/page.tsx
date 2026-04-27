@@ -4,11 +4,11 @@ import { LoginForm } from '@/app/login/login-form';
 
 export default async function Page() {
   const session = await auth();
-  console.log(session);
-  if (!session) {
-    console.log(session);
+  const userId = session?.user?.id;
+
+  if (!userId) {
     return <LoginForm />;
-  } else {
-    redirect(`/dashboard/${session.user.id}`);
   }
+
+  redirect(`/dashboard/${userId}`);
 }
