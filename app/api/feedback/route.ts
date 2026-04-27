@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { FeedbackCategory } from '@prisma/client';
 
 import { auth } from '@/lib/auth';
 import { createFeedback } from '@/server/feedback/mutations';
@@ -11,22 +10,19 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
 
-function parseCategory(rawValue: string | null): FeedbackCategory | undefined {
+const FEEDBACK_CATEGORIES = ['BUG', 'IDEA', 'UX'] as const;
+
+function parseCategory(rawValue: string | null) {
   if (!rawValue) return undefined;
 
   const normalized = rawValue.trim().toUpperCase();
 
-  if (
-    normalized !== FeedbackCategory.BUG &&
-    normalized !== FeedbackCategory.IDEA &&
-    normalized !== FeedbackCategory.UX
-  ) {
+  if (!FEEDBACK_CATEGORIES.includes(normalized as any)) {
     return undefined;
   }
 
-  return normalized as FeedbackCategory;
+  return normalized;
 }
-
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,10 +73,12 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
+
     const page = Math.max(
       Number(searchParams.get('page')) || DEFAULT_PAGE,
       DEFAULT_PAGE,
     );
+
     const pageSize = Math.min(
       Math.max(
         Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE,
@@ -94,7 +92,7 @@ export async function GET(request: NextRequest) {
     const result = await getFeedbackList({
       page,
       pageSize,
-      category,
+      category: category as any,
     });
 
     return NextResponse.json(result);
