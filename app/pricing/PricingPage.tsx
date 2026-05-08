@@ -18,7 +18,7 @@ const plans = {
   monthly: [
     {
       name: 'Standard',
-      price: 12,
+      price: 0,
       description: 'Perfect for growing teams and focused projects.',
       features: [
         'Up to 10 team members',
@@ -31,7 +31,7 @@ const plans = {
     },
     {
       name: 'Professional',
-      price: 24,
+      price: 0,
       description: 'Advanced features for high-performance organizations.',
       features: [
         'Unlimited team members',
@@ -47,7 +47,7 @@ const plans = {
   yearly: [
     {
       name: 'Standard',
-      price: 10,
+      price: 0,
       description: 'Perfect for growing teams and focused projects.',
       features: [
         'Up to 10 team members',
@@ -60,7 +60,7 @@ const plans = {
     },
     {
       name: 'Professional',
-      price: 19,
+      price: 0,
       description: 'Advanced features for high-performance organizations.',
       features: [
         'Unlimited team members',
@@ -215,9 +215,7 @@ function FeatureCard({
 export default function TeamSpacePricingPage() {
   const [isYearly, setIsYearly] = useState(false);
 
-  const currentPlans = useMemo(() => {
-    return isYearly ? plans.yearly : plans.monthly;
-  }, [isYearly]);
+  const currentPlans = isYearly ? plans.yearly : plans.monthly;
 
   return (
     <div className="min-h-screen bg-[#fafaf5] text-slate-900 [font-family:var(--font-body)]">
