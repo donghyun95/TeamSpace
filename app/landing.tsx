@@ -32,12 +32,6 @@ const Navbar = () => (
           >
             Features
           </Link>
-          <Link
-            href="/pricing"
-            className="text-sm font-medium text-slate-500 hover:text-[#4e45e4] transition-colors"
-          >
-            Pricing
-          </Link>
         </div>
       </div>
       <div className="flex items-center gap-6">
