@@ -228,9 +228,9 @@ export function LoginForm({
                   </div>
                 </Link>
 
-                <div className="hidden sm:block [&_button]:h-10 [&_button]:rounded-full [&_button]:bg-[#4e45e4] [&_button]:px-4 [&_button]:text-xs [&_button]:font-semibold [&_button]:text-[#fbf7ff]">
+                {/* <div className="hidden sm:block [&_button]:h-10 [&_button]:rounded-full [&_button]:bg-[#4e45e4] [&_button]:px-4 [&_button]:text-xs [&_button]:font-semibold [&_button]:text-[#fbf7ff]">
                   <SignUpDialog />
-                </div>
+                </div> */}
               </div>
 
               <div className="space-y-2">
@@ -344,7 +344,8 @@ export function LoginForm({
                 </div>
               </form>
               <div className="mb-4">
-                <div className="grid grid-cols-2 gap-3">
+                {/* <div className="grid grid-cols-2 gap-3"> */}
+                <div className="grid grid-cols-1 gap-3">
                   <Button
                     variant="outline"
                     className="h-11 rounded-xl border border-transparent bg-[#f3f4ee] text-sm font-semibold text-[#30332e] hover:border-[#b0b3ac]/30 hover:bg-[#e7e9e2]"
@@ -354,9 +355,9 @@ export function LoginForm({
                     Google
                   </Button>
 
-                  <div className="[&_button]:h-11 [&_button]:w-full [&_button]:rounded-xl [&_button]:border [&_button]:border-transparent [&_button]:bg-[#f3f4ee] [&_button]:text-sm [&_button]:font-semibold [&_button]:text-[#30332e] hover:[&_button]:border-[#b0b3ac]/30 hover:[&_button]:bg-[#e7e9e2]">
+                  {/* <div className="[&_button]:h-11 [&_button]:w-full [&_button]:rounded-xl [&_button]:border [&_button]:border-transparent [&_button]:bg-[#f3f4ee] [&_button]:text-sm [&_button]:font-semibold [&_button]:text-[#30332e] hover:[&_button]:border-[#b0b3ac]/30 hover:[&_button]:bg-[#e7e9e2]">
                     <SignUpDialog />
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
