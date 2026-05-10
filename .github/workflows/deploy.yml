@@ -65,7 +65,7 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v2
         with:
           secret-ids: |
-            terraSecret
+            CLOUDFLARE,terraSecret
           parse-json-secrets: true
 
       - name: Debug secrets
