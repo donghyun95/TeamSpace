@@ -15,11 +15,11 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # GitHub Actions가 ECR에 Docker image push 하기 위한 AWS 인증
       - name: Configure AWS credentials for ECR push
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: arn:aws:iam::990678687582:role/gitOIDC
           aws-region: ap-northeast-2
@@ -48,7 +48,7 @@ jobs:
 
       # Terraform Cloud 인증용
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
